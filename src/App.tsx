@@ -1,27 +1,60 @@
 import React from 'react';
-import './App.css';
+import './App.scss';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Dashboard from "./pages/dashboard"
 import Login from "./pages/login"
 import { initializeApp } from "firebase/app"
 import { config } from "./config/config"
 import AuthRoute from "./components/auth-route"
-import PageContainer from "./pages/page-container"
+import SettingsPage from "./pages/settings/settings"
+import CurrenciesPage from "./pages/settings/currencies"
+import CategoriesPage from "./pages/settings/categories"
+import { AddProject } from './components/projects/add-project';
+import { ProjectsPage } from './pages/project-page/projects-page';
 
 initializeApp(config.firebase)
 
 export type IAppProps = {}
 
 const App: React.FunctionComponent<IAppProps> = (props) => {
-  return (<BrowserRouter>
+	return (<BrowserRouter>
 		<Routes>
 			<Route path={"/"} element={
 				<AuthRoute>
-					<PageContainer>
-						<Dashboard />
-					</PageContainer>
-			</AuthRoute>}/>
-			<Route path={"/login"} element={<Login />}/>
+					<Dashboard />
+				</AuthRoute>
+			} />
+			<Route path={"/projects/:id"} element={
+				<AuthRoute>
+					<ProjectsPage />
+				</AuthRoute>
+			} />
+			<Route path={"/projects"} element={
+				<AuthRoute>
+					<ProjectsPage />
+				</AuthRoute>
+			} />
+			<Route path={"/add-project"} element={
+				<AuthRoute>
+					<AddProject />
+				</AuthRoute>
+			} />
+			<Route path={"/settings/currencies"} element={
+				<AuthRoute>
+					<CurrenciesPage />
+				</AuthRoute>
+			} />
+			<Route path={"/settings/categories"} element={
+				<AuthRoute>
+					<CategoriesPage />
+				</AuthRoute>
+			} />
+			<Route path={"/settings"} element={
+				<AuthRoute>
+					<SettingsPage />
+				</AuthRoute>
+			} />
+			<Route path={"/login"} element={<Login />} />
 		</Routes>
 	</BrowserRouter>);
 }

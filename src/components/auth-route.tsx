@@ -3,6 +3,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth"
 import { useNavigate } from "react-router-dom"
 import initUser from "../services/init-user"
 import { UserProvider } from "../providers/userProvider"
+import PageContainer from "../pages/page-container"
 
 export type IAuthRouteProps = {}
 
@@ -33,7 +34,11 @@ const AuthRoute: React.FunctionComponent<IAuthRouteProps & PropsWithChildren> = 
 	if (loading) {
 		return <p>Loading...</p>
 	}
-	return <UserProvider>{children}</UserProvider>
+	return <UserProvider>
+		<PageContainer>
+			{children}
+		</PageContainer>
+	</UserProvider>
 }
 
 export default AuthRoute

@@ -1,0 +1,52 @@
+@mixin reset {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  cursor: default;
+}
+
+.appBarMenu {
+  @include reset;
+  display: flex;
+  flex-direction: column;
+
+  li {
+    display: flex;
+    padding: 0 10px;
+    height: 30px;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  >li:first-child {
+    cursor: default;
+  }
+
+  .appBarSubMenu {
+    @include reset;
+    display: flex;
+    flex-direction: column;
+
+    li {
+      padding-left: 18px;
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      cursor: pointer;
+
+      .projectActions {
+        display: flex;
+        flex-direction: row;
+        margin-right: 6px;
+      }
+    }
+
+    li:hover {
+      background-color: rgb(242, 242, 242);
+    }
+
+    li.selectedProject {
+      background-color: rgb(232, 232, 232);
+    }
+  }
+}

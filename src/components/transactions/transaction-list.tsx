@@ -12,8 +12,8 @@ export type ITransactionListProps = {
 	type: "outcomes" | "incomes"
 }
 
-const TransactionList: React.FunctionComponent<ITransactionListProps> = ({type}) => {
-	const {user, settings} = useContext(UserContext)
+const TransactionList: React.FunctionComponent<ITransactionListProps> = ({ type }) => {
+	const { user, settings } = useContext(UserContext)
 	const [error, setError] = useState("")
 	const [txs, setTxs] = useState<(Outcomes | Incomes)[]>([])
 	const [summary, setSummary] = useState("")
@@ -35,15 +35,16 @@ const TransactionList: React.FunctionComponent<ITransactionListProps> = ({type})
 	}, [user?.uid, type])
 
 	useEffect(() => {
-		const summaryBn = txs.reduce((p,c) => {
-			p = p.plus(new BigNumber(c.amount))
+		const summaryBn = txs.reduce((p, c) => {
+			p = c.amount ? p.plus(new BigNumber(c.amount)) : new BigNumber(0)
+			console.log("p", p.toNumber())
 			return p
 		}, new BigNumber(0))
 		setSummary(summaryBn.toString())
 	}, [txs])
 
 	const getCategoryName = (catId: string) => {
-		return settings[type === "outcomes" ? "outcomeCategories": "incomeCategories"][catId]?.displayName!
+		return settings[type === "outcomes" ? "outcomeCategories" : "incomeCategories"][catId]?.displayName!
 	}
 
 	if (error) {

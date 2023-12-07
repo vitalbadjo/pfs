@@ -8,15 +8,17 @@ import { UserContext } from "../../providers/userContext"
 import { getDatabase } from "firebase/database"
 import { green } from "@mui/material/colors"
 import settingsService from "../../services/settings"
+import { useNavigate } from "react-router-dom"
 
 export type ICategoryFormProps = {
 	type: "incomeCategories" | "outcomeCategories"
 }
 
-const CategoryForm: React.FunctionComponent<ICategoryFormProps> = ({type}) => {
-	const {user} = useContext(UserContext)
+const CategoryForm: React.FunctionComponent<ICategoryFormProps> = ({ type }) => {
+	const { user } = useContext(UserContext)
 	const [loading, setLoading] = useState(false)
-	const [form, setForm] = useState({displayName: "", icon: ""})
+	const [form, setForm] = useState({ displayName: "", icon: "" })
+	const navigate = useNavigate()
 	const text = type === "incomeCategories" ?
 		{
 			title: "Add income category",
@@ -40,7 +42,7 @@ const CategoryForm: React.FunctionComponent<ICategoryFormProps> = ({type}) => {
 
 	}
 
-	const handleChange = (event: SelectChangeEvent | ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, key: keyof typeof form ) => {
+	const handleChange = (event: SelectChangeEvent | ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, key: keyof typeof form) => {
 		setForm(prevState => ({
 			...prevState,
 			[key]: event.target.value
@@ -66,7 +68,7 @@ const CategoryForm: React.FunctionComponent<ICategoryFormProps> = ({type}) => {
 				required
 			/>
 		</div>
-		<Box sx={{ m: 1, position: "relative", display: "inline-grid" }}>
+		<Box sx={{ m: 1, position: "relative", display: "inline-grid", gap: 1 }}>
 			<Button
 				disabled={loading}
 				onClick={() => onSave()}
@@ -84,6 +86,7 @@ const CategoryForm: React.FunctionComponent<ICategoryFormProps> = ({type}) => {
 					}}
 				/>
 			)}
+			<Button variant="contained" onClick={() => navigate("/settings")}>Back</Button>
 		</Box>
 	</Box>
 }

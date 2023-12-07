@@ -8,13 +8,15 @@ import { UserContext } from "../../providers/userContext"
 import { getDatabase } from "firebase/database"
 import { green } from "@mui/material/colors"
 import settingsService from "../../services/settings"
+import { useNavigate } from "react-router-dom"
 
 export type ICurrencyFormProps = {}
 
 const CurrencyForm: React.FunctionComponent<ICurrencyFormProps> = () => {
-	const {user} = useContext(UserContext)
+	const { user } = useContext(UserContext)
 	const [loading, setLoading] = useState(false)
-	const [form, setForm] = useState({displayName: "", visible: true, isFiat: true })
+	const [form, setForm] = useState({ displayName: "", visible: true, isFiat: true })
+	const navigate = useNavigate()
 
 	const onSave = async () => {
 		if (user?.uid) {
@@ -31,7 +33,7 @@ const CurrencyForm: React.FunctionComponent<ICurrencyFormProps> = () => {
 
 	}
 
-	const handleChange = (event: SelectChangeEvent | ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, key: keyof typeof form ) => {
+	const handleChange = (event: SelectChangeEvent | ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, key: keyof typeof form) => {
 		setForm(prevState => ({
 			...prevState,
 			[key]: event.target.value
@@ -57,7 +59,7 @@ const CurrencyForm: React.FunctionComponent<ICurrencyFormProps> = () => {
 				required
 			/>
 		</div>
-		<Box sx={{ m: 1, position: "relative", display: "inline-grid" }}>
+		<Box sx={{ m: 1, position: "relative", display: "inline-grid", gap: 1 }}>
 			<Button
 				disabled={loading}
 				onClick={() => onSave()}
@@ -75,7 +77,9 @@ const CurrencyForm: React.FunctionComponent<ICurrencyFormProps> = () => {
 					}}
 				/>
 			)}
+			<Button variant="contained" onClick={() => navigate("/settings")}>Back</Button>
 		</Box>
+
 	</Box>
 }
 

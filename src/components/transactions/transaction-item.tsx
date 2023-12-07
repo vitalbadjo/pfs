@@ -14,7 +14,7 @@ export type ITransactionItemProps = {
 	currency: string
 }
 
-const TransactionItem: React.FunctionComponent<ITransactionItemProps> = ({title, amount, currency}) => {
+const TransactionItem: React.FunctionComponent<ITransactionItemProps> = ({ title, amount, currency }) => {
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const open = Boolean(anchorEl);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -23,6 +23,7 @@ const TransactionItem: React.FunctionComponent<ITransactionItemProps> = ({title,
 	const handleClose = () => {
 		setAnchorEl(null);
 	};
+
 	return <ListItem
 		secondaryAction={
 			<>
@@ -33,7 +34,7 @@ const TransactionItem: React.FunctionComponent<ITransactionItemProps> = ({title,
 					aria-expanded={open ? 'true' : undefined}
 					onClick={handleClick}
 				>
-					<MoreVert/>
+					<MoreVert />
 				</IconButton>
 				<Menu
 					id="basic-menu"
@@ -50,7 +51,7 @@ const TransactionItem: React.FunctionComponent<ITransactionItemProps> = ({title,
 			</>
 		}
 	>
-		<ListItemText primary={`${title} ${amount}${currency}`}/>
+		<ListItemText primary={`${title} ${amount}${currency}`} />
 
 	</ListItem>
 }

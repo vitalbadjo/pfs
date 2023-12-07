@@ -10,4 +10,7 @@ export const realtimeDatabasePaths = {
 	userPath: (uid: string) => `users/${uid}`,
 	outcomes: (uid: string) => `outcomes/${uid}`,
 	incomes: (uid: string) => `incomes/${uid}`,
+	projectsPath: (uid: string) => `projects/${uid}`,
+	conditionsPath: (uid: string, projectId: string) => `projects/${uid}/${projectId}/conditions`,
+	tasksPath: (uid: string, projectId: string, conditionId: string) => `tasks/${uid}/${projectId}/${conditionId}`
 }

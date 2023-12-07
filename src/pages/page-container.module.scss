@@ -1,0 +1,35 @@
+@mixin pageStyles {
+  min-height: 100%;
+  padding: 10px;
+  background-color: rgb(255, 255, 255);
+}
+
+.pageContainer {
+  display: grid;
+  grid-template-areas: "header header" "leftbar body";
+  grid-template-rows: 60px calc(100vh - 62px);
+  grid-template-columns: 140px auto;
+  background-color: rgb(63, 63, 63);
+  grid-gap: 2px;
+
+  .header {
+    grid-area: header;
+    @include pageStyles;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .leftBar {
+    grid-area: leftbar;
+    @include pageStyles;
+  }
+
+  .body {
+    grid-area: body;
+    @include pageStyles;
+    max-width: calc(100vw - 140px);
+    overflow: auto;
+  }
+}

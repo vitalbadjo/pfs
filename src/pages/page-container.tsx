@@ -1,19 +1,18 @@
-import { Grid } from "@mui/material"
-import React, { PropsWithChildren } from "react"
-import MiniDrawer from "../components/app-bar"
+import React, { PropsWithChildren, useState } from "react"
+import styles from "./page-container.module.scss"
+import AppBar from "../components/appBar/appBar";
+import Header from "../components/header/header";
 
 const PageContainer: React.FunctionComponent<PropsWithChildren> = ({ children }) => {
-	return <Grid
-		container
-		direction="column"
-		justifyContent="space-between"
-		alignItems="center"
-		height="100vh"
-	>
-		<Grid item>
-				<MiniDrawer>{children}</MiniDrawer>
-		</Grid>
-	</Grid>
+	return <div className={styles.pageContainer}>
+		<nav className={styles.header}>
+			<Header />
+		</nav>
+		<div className={styles.leftBar}>
+			<AppBar />
+		</div>
+		<div className={styles.body}>{children}</div>
+	</div>
 }
 
 export default PageContainer
