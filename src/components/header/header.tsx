@@ -39,9 +39,9 @@ export default function Header(props: PropsWithChildren) {
 
   return (<>
     <ul className={styles.headerNav}>
+      <li onClick={() => onClick("Projects", "Projects")}>Projects</li>
       <li onClick={() => onClick("PFS Dashboard", "Dashboard")}>Dashboard</li>
       <li onClick={() => onClick("Settings", "Settings")}>Settings</li>
-      <li onClick={() => onClick("Projects", "Projects")}>Projects</li>
     </ul>
     <div className={styles.userInfo}>
       <div>{user?.displayName}</div>

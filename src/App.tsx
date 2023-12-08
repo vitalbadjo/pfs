@@ -8,8 +8,6 @@ import { config } from "./config/config"
 import AuthRoute from "./components/auth-route"
 import SettingsPage from "./pages/settings/settings"
 import CurrenciesPage from "./pages/settings/currencies"
-import CategoriesPage from "./pages/settings/categories"
-import { AddProject } from './components/projects/add-project';
 import { ProjectsPage } from './pages/project-page/projects-page';
 
 initializeApp(config.firebase)
@@ -34,19 +32,9 @@ const App: React.FunctionComponent<IAppProps> = (props) => {
 					<ProjectsPage />
 				</AuthRoute>
 			} />
-			<Route path={"/add-project"} element={
-				<AuthRoute>
-					<AddProject />
-				</AuthRoute>
-			} />
 			<Route path={"/settings/currencies"} element={
 				<AuthRoute>
 					<CurrenciesPage />
-				</AuthRoute>
-			} />
-			<Route path={"/settings/categories"} element={
-				<AuthRoute>
-					<CategoriesPage />
 				</AuthRoute>
 			} />
 			<Route path={"/settings"} element={

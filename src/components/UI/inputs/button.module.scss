@@ -1,0 +1,23 @@
+@use "../../../config/vars";
+
+.button {
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  border: 1px solid vars.$blackColor;
+
+
+  &.error {
+    color: vars.$red;
+  }
+
+  &.success {
+    border-color: vars.$green;
+  }
+
+  &:hover {
+    background-color: scale-color($color: #ffffff, $lightness: -5%);
+    border-color: vars.$gray;
+    ;
+  }
+}

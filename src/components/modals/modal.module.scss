@@ -24,12 +24,24 @@
   top: 10px;
 }
 
-.modalHeader {}
+.modalHeader {
+  margin-bottom: 20px;
+  text-align: center;
+  grid-area: header;
+}
 
 .modalTitle {}
 
-.modalBody {}
+.modalBody {
+  margin-bottom: 10px;
+}
 
-.modalFooter {}
+.modalFooter {
+  display: grid;
+  grid-gap: 10px;
+  grid-template-columns: 1fr 1fr;
+}
 
-.modalButton {}
+.modalButton {
+  text-align: center;
+}

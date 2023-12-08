@@ -25,3 +25,4 @@ make uncharted condition for tasks without condition id
 
 TODO 
 add unsubscribers on all on* firebase functions
+add project condition and tasks order and reorder

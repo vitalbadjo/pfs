@@ -1,0 +1,33 @@
+.dropdownButton {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  background-image: radial-gradient(circle, #4b4b4b 2px, transparent 1px);
+  background-size: 100% 33.33%;
+  border: none;
+  border-radius: 3px;
+  background-color: transparent;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #dadada;
+  }
+}
+
+.dropdownContainer {
+  display: none;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 140px;
+  padding: 10px;
+  border-radius: 6px;
+  background: white;
+  box-shadow: 0 0 14px 0px #6a6a6a;
+  grid-gap: 6px;
+  z-index: 101;
+
+  &Visible {
+    display: grid;
+  }
+}

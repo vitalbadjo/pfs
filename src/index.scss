@@ -1,4 +1,6 @@
+@use "./config/vars";
 @import-normalize;
+
 
 body {
   margin: 0;
@@ -16,4 +18,35 @@ code {
 
 * {
   box-sizing: border-box;
+  font-family: 'Ubuntu', sans-serif;
+  color: vars.$blackColor;
+  border: none;
+  border-color: vars.$blackColor;
+  background-color: transparent;
+  margin: 0;
+}
+
+input {
+  all: unset;
+}
+
+button {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+h4 {
+  font-size: 16px;
+}
+
+$transitionTime: 300ms;
+
+// transitions
+button,
+input,
+div,
+ul,
+li {
+  transition:
+    background-color ease $transitionTime, color ease $transitionTime, border-color ease $transitionTime, opacity ease $transitionTime, position ease $transitionTime, width ease $transitionTime, height ease $transitionTime;
 }

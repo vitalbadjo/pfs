@@ -20,7 +20,7 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
     </div>
   } else {
     return <div className={style.task}>
-      {(condId && projId) && <Modal title="Add project" isOpen={isModalOpen} setIsOpen={setIsModalOpen} closeButtonText="Cancel">
+      {(condId && projId) && <Modal title="Add project" isOpen={isModalOpen} setIsOpen={setIsModalOpen} closeButtonText="Cancel" actionFunc={() => { }} actionText="sad">
         <TaskForm projectId={projId} conditionId={condId} closeModalAction={setIsModalOpen} />
       </Modal>}
       <div className={style.taskDesc} onClick={() => setIsModalOpen(true)}>+ Add task</div>
