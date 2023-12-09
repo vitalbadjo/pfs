@@ -6,6 +6,10 @@
   margin-bottom: 6px;
 }
 
-.taskTitle {}
+.taskTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
 .taskDesc {}

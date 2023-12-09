@@ -1,0 +1,28 @@
+@use "./vars";
+
+.fs {
+  font-size: vars.$fS;
+}
+
+.fm {
+  font-size: vars.$fM;
+}
+
+.fl {
+  font-size: vars.$fL;
+}
+
+.fsb {
+  @extend .fs;
+  font-weight: vars.$f2B;
+}
+
+.fmb {
+  @extend .fm;
+  font-weight: vars.$f2B;
+}
+
+.flb {
+  @extend .fl;
+  font-weight: vars.$f2B;
+}

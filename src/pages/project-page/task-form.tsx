@@ -1,61 +1,41 @@
-import React, { useContext, useState } from "react"
-import { UserContext } from "../../providers/userContext"
-import { getDatabase } from "firebase/database"
-import tasksService from "../../services/tasks"
-import { ProjectColors } from "../../models/projects-model"
+import React, { useState } from "react"
+import { Task } from "../../models/projects-model"
+import { TextInput } from "../../components/UI/inputs/textInput"
+import { TaskData } from "./task-item"
 
 type ITaskForm = {
-  projectId: string
-  conditionId: string
-  closeModalAction: Function
+  data: TaskData
+  onChangeAction: Function
 }
 
 export const TaskForm: React.FunctionComponent<ITaskForm> = (props) => {
-  const { projectId, conditionId, closeModalAction } = props
-  const [name, setName] = useState("")
-  const [desc, setDesc] = useState("")
-  const [color, setColor] = useState<ProjectColors>("gray")
-  const [loading, setLoading] = useState(false)
-  const { user } = useContext(UserContext)
+  const { data, onChangeAction } = props
 
-
-  const onSaveTask = async () => {
-    if (user?.uid) {
-      setLoading(true)
-      await tasksService(getDatabase(), user?.uid, projectId, conditionId)
-        .create({
-          displayName: name,
-          description: desc,
-          color: color
-        })
-      setLoading(false)
-      closeModalAction(false)
-    }
-  }
-
-  const onChange = (e: React.FormEvent<HTMLInputElement>, field: "name" | "desc" | "color") => {
-    switch (field) {
-      case "name":
-        setName(e.currentTarget.value)
-        break;
-      case "desc":
-        setDesc(e.currentTarget.value)
-        break;
-      case "color":
-        setColor(e.currentTarget.value as ProjectColors)
-        break;
-      default:
-        break;
-    }
+  const onChange = (value: string, field: keyof Task) => {
+    onChangeAction({
+      ...data,
+      [field]: value
+    })
   }
 
   return <div className="taskForm">
-    <input value={name} onChange={(e) => onChange(e, "name")} />
-    <input value={desc} onChange={(e) => onChange(e, "desc")} />
-    <input value={color} onChange={(e) => onChange(e, "color")} />
-    <button
-      onClick={onSaveTask}
-      disabled={!name && !desc && !color}
-    >Add task</button>
+    <TextInput
+      value={data.displayName}
+      onChange={(e) => onChange(e, "displayName")}
+      type="text"
+      placeholder="Название"
+    />
+    <TextInput
+      value={data.description || ""}
+      onChange={(e) => onChange(e, "description")}
+      type="text"
+      placeholder="Описание"
+    />
+    <TextInput
+      value={data.color || ""}
+      onChange={(e) => onChange(e, "color")}
+      type="color"
+      placeholder="Цвет"
+    />
   </div>
 }

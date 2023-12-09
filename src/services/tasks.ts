@@ -16,7 +16,7 @@ const tasksService = (dbRef: Database, uid: string, projectId: string, condition
     async create(newData: Omit<Task, "id" | "projectId" | "taskCondition">) {
       const newItemRef = push(tasksRef, newData)
       try {
-        await set(newItemRef, { ...newData, id: newItemRef.key })
+        await set(newItemRef, { ...newData, id: newItemRef.key, projectId, taskCondition: conditionId })
       } catch (error) {
         console.log("Task creation error: ", error)
       }

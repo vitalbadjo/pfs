@@ -25,7 +25,6 @@ export const ProjectsPage: React.FunctionComponent = () => {
 
       unsubscribe = onValue(txRef, (snapshot) => {
         const data = snapshot.val();
-        console.log("conddata", data, user?.uid, id)
         if (!!data) {
           setConditions(Object.values(data))
         } else {
