@@ -1,4 +1,4 @@
-import { FunctionComponent, MouseEventHandler, PropsWithChildren, useEffect, useRef, useState } from "react"
+import { FunctionComponent, PropsWithChildren, useEffect, useRef, useState } from "react"
 import styles from "./dropdown.module.scss"
 
 

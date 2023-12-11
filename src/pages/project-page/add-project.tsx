@@ -1,6 +1,6 @@
 import React from "react"
 import { Project } from "../../models/projects-model"
-import { TextInput } from "../UI/inputs/textInput"
+import { TextInput } from "../../components/UI/inputs/textInput"
 
 type IAddProjectForm = {
   data: Omit<Project, "id" | "conditions">
