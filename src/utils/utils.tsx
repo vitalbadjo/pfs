@@ -8,80 +8,39 @@ export const insertAtIndex: <T>(array: T[], index: number, item: T) => T[] = (ar
   return [...array.slice(0, index), item, ...array.slice(index)];
 };
 
-const findParents = (arr: OrderById[], item: OrderById): OrderById[] => {
-  let index = arr.findIndex(v => v.id === item.order)
-  if (index > -1) {
-    const parent = arr[index]
-    const spliced = [...arr]
-    spliced.splice(index, 1)
-    return [...findParents(spliced, parent), parent]
-  }
-  return [item]
-}
+export type ReorderType = {
+  orderId: string
+  id: string
+} & Record<string, string | number | object | [] | undefined>
 
-export const orderById = (data: OrderById[]) => {
+export const reorder = (activeId: string, targetId: string, data: Record<string, ReorderType>) => {
+  // if (activeId.length !== 20 || targetId.length !== 20) {
+  //   console.log("Can't reorder items because one of id's is incorrect", `active id: ${activeId}`, `target id: ${targetId}`)
+  //   return data
+  // }
 
-  const sortable: OrderById[] = data.filter((v) => data.find(e => v.id === e.order))
-  // console.log("sortable", sortable)
-  const unsortable: OrderById[] = data.filter((v) => !data.find(e => v.id === e.order))
-  // console.log("unsortable", unsortable)
-  const root = [...unsortable, ...sortable.filter(v => unsortable.find((e => v.id === e.order)))]
-  console.log("root", root)
-  if (root.length) {
-    // root.forEach(v => {
-    //   const i = sortable.findIndex(e => v.id === e.order)
-    //   if (i > -1) {
-    //     root.push(sortable[i])
-    //   }
-    // })
-
-    while (sortable.find(e => e.id === root[root.length - 1].order)) {
-      console.log("root", root)
-      root.push(sortable.find(e => e.id === root[root.length - 1].order)!)
-    }
+  const { id: activeItemId, orderId: activeItemOrderId } = { ...data[activeId] }
+  const { id: targetItemId, orderId: targetItemOrderId } = { ...data[targetId] }
+  if (Math.abs(+activeItemOrderId - +targetItemOrderId) === 1) {
+    data[activeItemId].orderId = targetItemOrderId
+    data[targetItemId].orderId = activeItemOrderId
   } else {
-    throw Error("Elements for sorting is recurse")
+    if (activeItemOrderId > targetItemOrderId) {
+      Object.keys(data).forEach(v => {// смещаем все что ниже таргета на 1
+        if (data[v].orderId >= targetItemOrderId && data[v].orderId < activeItemOrderId) {
+          // console.log(data[+v])
+          data[v].orderId = `${+data[v].orderId + 1}`
+        }
+      })
+      data[activeItemId].orderId = targetItemOrderId
+    } else {
+      Object.keys(data).forEach(v => { // все что больше активного и меньше таргета смещаем на -1
+        if (data[v].orderId <= targetItemOrderId && data[v].orderId > activeItemOrderId) {
+          data[v].orderId = `${+data[v].orderId - 1}`
+        }
+      })
+      data[activeItemId].orderId = targetItemOrderId
+    }
   }
-  return root
-  // return sortable.reduce((p, c, i, a) => {
-  //   const prevA = a.findIndex(v => v.id === c.order)
-  //   if (prevA > -1) {
-
-  //   } else {
-  //     p = insertAtIndex(p,0,c)
-  //   }
-  //   if (p.findIndex(v => v.id === c.id) === -1) {
-
-  //     if (prevA > -1) {
-
-  //       const prevB = p.findIndex(v => v.id === c.order)
-  //       if (prevB > -1) {
-  //         p = insertAtIndex(p, prevB + 1, c)
-  //       } else {
-  //         p = [...p, ...findParents(a, c)]
-  //       }
-  //     } else {
-  //       p = [c, ...p]
-  //     }
-  //   }
-
-
-  //   // if (i === a.length - 1) {
-  //   //   if (temp.length > 0) {
-  //   //     const arr = [...p, ...temp]
-  //   //     temp = []
-  //   //     p = orderById(arr)
-  //   //   }
-  //   // }
-
-  //   return p
-  // }, [] as OrderById[])
+  return data
 }
-const testData = [
-  { id: "dsa", order: "asd", o: 4 },
-  { id: "ewq", order: "qwe", o: 2 },
-  { id: "qwe", order: undefined, o: 1 },
-  { id: "cxz", order: "zxc", o: 6 },
-  { id: "asd", order: "ewq", o: 3 },
-  { id: "zxc", order: "dsa", o: 5 },
-]

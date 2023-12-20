@@ -16,7 +16,7 @@ type ITaskItemProps = {
 }
 
 export type TaskData = Omit<Task, "projectId" | "taskCondition" | "id">
-const defaultTaskData: TaskData = { displayName: "" }
+const defaultTaskData: TaskData = { displayName: "", orderId: 0 }
 export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId, projId }) => {
   const { user } = useContext(UserContext)
   const [isModalOpen, setIsModalOpen] = useState(false)

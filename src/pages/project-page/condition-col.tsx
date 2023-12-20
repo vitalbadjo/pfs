@@ -18,7 +18,7 @@ type IConditionColumnProps = {
 
 const defaultConditionData: TaskConditionData = { displayName: "" }
 
-export type TaskConditionData = Omit<TaskCondition, "id" | "projectId">
+export type TaskConditionData = Omit<TaskCondition, "id" | "projectId" | "orderId">
 
 export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (props) => {
   const { condition, projectId } = props

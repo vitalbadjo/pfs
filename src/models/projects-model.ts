@@ -3,7 +3,7 @@ import { APP_CONSTANTS } from "../config/constants"
 export type ProjectColors = keyof typeof APP_CONSTANTS.styles.colors.cardBackgrounds
 
 export type KanbanBaseFields = {
-  order?: number
+  orderId: number
   displayName: string
   id: string
   description?: string
@@ -12,7 +12,7 @@ export type KanbanBaseFields = {
 }
 
 export type TaskCondition = {
-  order?: number
+  orderId: number
   projectId: Project["id"]
   id: string
   displayName: string

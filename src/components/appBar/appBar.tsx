@@ -10,31 +10,38 @@ import styles from "./appBar.module.scss"
 import projectsService from '../../services/projects';
 import Modal from '../modals/modal';
 import { AddProjectForm } from '../../pages/project-page/add-project';
-import { DndContext, DragEndEvent, DragStartEvent, KeyboardSensor, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverEvent, DragStartEvent, KeyboardSensor, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core';
 import { DndProjects } from './dndProjects';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { ReorderType, reorder } from '../../utils/utils';
 
 export default function AppBar(props: PropsWithChildren) {
 	const navigate = useNavigate()
 
 	const { user } = useContext(UserContext)
+	// modals state
 	const [isModalOpen, setIsModalOpen] = useState(false)
 	const [isAddProjectModal, setAddProjectModal] = useState(false)
+	// fetched data state
+	// const [projects, setProjects] = useState<Project[]>([])
+	const [projectsRaw, setProjectsRaw] = useState<Record<string, Project>>({})
+	// form data state
 	const [projectToDelete, setProjectToDelete] = useState<Project | null>(null)
-	const [projects, setProjects] = useState<Project[]>([])
-	const [addProjectData, setAddProjectData] = useState<Omit<Project, "id" | "conditions">>({ displayName: "" })
-	const [activeProj, setActiveProj] = useState<Project>()
+	const [addProjectData, setAddProjectData] = useState<Omit<Project, "id" | "conditions" | "orderId">>({ displayName: "" })
+	// menu data state
+	const [activeProj, setActiveProj] = useState<Project | null>(null)
 
 	useEffect(() => {
 		const db = getDatabase()
 		const txRef = ref(db, realtimeDatabasePaths.projectsPath(user?.uid!))
 		onValue(txRef, (snapshot) => {
-			const data = snapshot.val();
+			const data: Record<string, Project> = snapshot.val();
 			if (!!data) {
-				setProjects(Object.values(data))
+				setProjectsRaw(data)
+				// setProjects(Object.values(data))
 			} else {
-				setProjects([])
+				// setProjects([])
 				console.log('Data not found');
 			}
 		});
@@ -66,11 +73,21 @@ export default function AppBar(props: PropsWithChildren) {
 	}
 
 	const dragStart = (e: DragStartEvent) => {
-		console.log("drag start", e)
-		setActiveProj(projects.find(p => p.id === e.active.id))
+		// console.log("drag start", e)
+		setActiveProj(Object.values(projectsRaw).find(p => p.id === e.active.id) || null)
 	}
-	const dragEnd = (e: DragEndEvent) => {
-		console.log("drag end", e)
+
+	const dragEnd = async (e: DragEndEvent) => {
+		setActiveProj(null)
+		const act = `${e.active.id}`
+		const tar = `${e.over?.id}`
+
+		if (act && tar && act !== tar) {
+			const newrojectsRawState = reorder(act, tar, projectsRaw as any)
+			setProjectsRaw(newrojectsRawState as any)
+			await projectsService(getDatabase(), user?.uid!).swap(act, tar)
+			console.log("Update on server completed!")
+		}
 	}
 
 	const sensors = useSensors(
@@ -123,7 +140,7 @@ export default function AppBar(props: PropsWithChildren) {
 					setIsModalOpen={setIsModalOpen}
 					setProjectToDelete={setProjectToDelete}
 					editProject={editProject}
-					projects={projects}
+					projects={Object.values(projectsRaw)}
 					onClickProject={onClickProject}
 				/>
 				{/* <ul className={styles.appBarSubMenu}>

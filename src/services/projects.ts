@@ -1,13 +1,15 @@
-import { Database, get, ref, remove, update, push, set } from "firebase/database"
+import { Database, get, ref, remove, update, push, set, onValue } from "firebase/database"
 import { realtimeDatabasePaths } from "../models/realtime-database-paths"
 import { checkSnapshotExist } from "./utils"
 import { Transaction } from "../models/transaction"
 import { Project } from "../models/projects-model"
+import { reorder } from "../utils/utils"
 
 const projectsService = (dbRef: Database, uid: string) => {
+  const path = realtimeDatabasePaths.projectsPath(uid)
   const projectsRef = ref(
     dbRef,
-    realtimeDatabasePaths.projectsPath(uid)
+    path
   )
 
   return {
@@ -15,9 +17,38 @@ const projectsService = (dbRef: Database, uid: string) => {
       const snapshot = await get(projectsRef)
       return checkSnapshotExist(snapshot)
     },
-    async create(newData: Omit<Project, "id">) {
+    // subscribe(callback: (data: Record<string, Project>) => void) {
+    //   onValue(projectsRef, (snapshot) => {
+    //     const data: Record<string, Project>  = snapshot.val();
+    //     if (!!data) {
+    //       callback(Object.values(data))
+    //     } else {
+    //       console.log('Project service: Data not found');
+    //     }
+    //   }),
+    // },
+    async create(newData: Omit<Project, "id" | "orderId">) {
+      const projects = Object.values<Project>((await this.getAll()) || {})
+      // const orderId = projects.length ? projects.sort((a, b) => a?.orderId! - b?.orderId!)[projects.length - 1].orderId! + 1 : 10000
+      const orderId = projects.length ? projects.sort((a, b) => a?.orderId! - b?.orderId!)[projects.length - 1].orderId! + 1 : 1
       const newItemRef = push(projectsRef, newData)
-      await set(newItemRef, { ...newData, id: newItemRef.key, conditions: {} })
+      await set(newItemRef, { ...newData, id: newItemRef.key, orderId, conditions: {} })
+    },
+    async swap(activeProjectId: string, targetProjectId: string) {
+      const projects = await this.getAll()
+      console.log("old", projects)
+      const newData = reorder(activeProjectId, targetProjectId, projects)
+      console.log("new", newData)
+      await update(projectsRef, newData)
+    },
+    async _create(newData: Omit<Project, "id">) {
+      const projects = await this.getAll()
+      console.log("Service: projects - ", projects)
+      const oid = projects.length
+      const newRef = ref(dbRef, `${path}/${oid}`)
+      const key = push(projectsRef, newData).key
+      // // const newItemRef = push(newRef, newData)
+      await set(newRef, { ...newData, id: key, conditions: {} })
     },
     async delete(projectId: string) {
       const transactionRef = ref(dbRef, `${realtimeDatabasePaths.projectsPath(uid)}/${projectId}`)
@@ -43,7 +74,7 @@ const projectsService = (dbRef: Database, uid: string) => {
           const snapshot = await get(conditionsRef)
           return checkSnapshotExist(snapshot)
         },
-        async create(newData: Omit<Project, "id">) {
+        async create(newData: Omit<Project, "id" | "orderId">) {
           const newItemRef = push(conditionsRef, newData)
           await set(newItemRef, { ...newData, id: newItemRef.key })
         },

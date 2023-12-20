@@ -3,8 +3,8 @@ import { Project } from "../../models/projects-model"
 import { TextInput } from "../../components/UI/inputs/textInput"
 
 type IAddProjectForm = {
-  data: Omit<Project, "id" | "conditions">
-  setData: (data: Omit<Project, "id">) => void
+  data: Omit<Project, "id" | "conditions" | "orderId">
+  setData: (data: Omit<Project, "id" | "orderId">) => void
 }
 
 export const AddProjectForm: React.FunctionComponent<IAddProjectForm> = (props) => {
