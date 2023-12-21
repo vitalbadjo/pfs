@@ -1,7 +1,6 @@
 import { getAuth, GoogleAuthProvider, signInWithPopup, User } from "firebase/auth"
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
-import { Button } from "@mui/material"
 
 export default function Login() {
 	const auth = getAuth()
@@ -29,6 +28,6 @@ export default function Login() {
 
 	return <>
 		Login
-		<Button onClick={() => signInWithGoogle()} disabled={authing} variant="outlined">Sign in with google</Button>
+		<button onClick={() => signInWithGoogle()} disabled={authing} >Sign in with google</button>
 	</>
 }

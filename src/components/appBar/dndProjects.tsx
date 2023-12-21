@@ -1,7 +1,7 @@
 import { FunctionComponent, PropsWithChildren } from "react";
 import { Project } from "../../models/projects-model";
 import styles from "./appBar.module.scss"
-import { DragOverlay, useDroppable } from '@dnd-kit/core';
+import { DragOverlay } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { Dropdown } from "../UI/dropdown/dropdown";
 import { useParams } from "react-router-dom";
@@ -94,7 +94,7 @@ const DndProjectsItem: FunctionComponent<IDndProjectsItemProps> = (props) => {
       style: { dragButtonStyle },
       className: styles.dragHandler
     })}
-    <div {...listeners} {...attributes} style={dragButtonStyle} className={styles.dragHandler}></div>
+    {/* <div {...listeners} {...attributes} style={dragButtonStyle} className={styles.dragHandler}></div> */}
     {proj.displayName}
     <Dropdown hover={false}>
       <Button onClick={() => editProject(proj)} text="Edit" />

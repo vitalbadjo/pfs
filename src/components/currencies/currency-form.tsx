@@ -1,12 +1,6 @@
-import {
-	Box, Button, CircularProgress,
-	SelectChangeEvent,
-	TextField,
-} from "@mui/material"
 import { ChangeEvent, useContext, useState } from "react"
 import { UserContext } from "../../providers/userContext"
 import { getDatabase } from "firebase/database"
-import { green } from "@mui/material/colors"
 import settingsService from "../../services/settings"
 import { useNavigate } from "react-router-dom"
 
@@ -33,54 +27,32 @@ const CurrencyForm: React.FunctionComponent<ICurrencyFormProps> = () => {
 
 	}
 
-	const handleChange = (event: SelectChangeEvent | ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, key: keyof typeof form) => {
+	const handleChange = (event: ChangeEvent<HTMLSelectElement> | ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, key: keyof typeof form) => {
 		setForm(prevState => ({
 			...prevState,
 			[key]: event.target.value
 		}))
 	};
-	return <Box
-		component="form"
-		sx={{
-			'& .MuiTextField-root': { m: 1, width: '25ch' },
-		}}
-		noValidate
-		autoComplete="off"
-	>
+	return <div	>
 		<div>
-			<TextField
-				error={false}
+			<textarea
 				id="outlined-error"
-				label="Currency name"
 				placeholder="Please enter currency name"
-				helperText=""
 				value={form.displayName}
 				onChange={e => handleChange(e, "displayName")}
 				required
 			/>
 		</div>
-		<Box sx={{ m: 1, position: "relative", display: "inline-grid", gap: 1 }}>
-			<Button
+		<div>
+			<button
 				disabled={loading}
 				onClick={() => onSave()}
-				variant="contained">Add currency</Button>
-			{loading && (
-				<CircularProgress
-					size={24}
-					sx={{
-						color: green[500],
-						position: 'absolute',
-						top: '50%',
-						left: '50%',
-						marginTop: '-12px',
-						marginLeft: '-12px',
-					}}
-				/>
-			)}
-			<Button variant="contained" onClick={() => navigate("/settings")}>Back</Button>
-		</Box>
+			>Add currency</button>
+			{loading && "loading"}
+			<button onClick={() => navigate("/settings")}>Back</button>
+		</div>
 
-	</Box>
+	</div>
 }
 
 export default CurrencyForm

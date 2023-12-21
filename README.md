@@ -27,3 +27,7 @@ TODO
 add unsubscribers on all on* firebase functions
 add project condition and tasks order and reorder
 on remove condition add counter untracked tasks and edit it
+
+BUGS
+- when remove last project it doesnt remove from appbar, page reloading is removing this bug
+- projects page conditions row last col delimiter not correct

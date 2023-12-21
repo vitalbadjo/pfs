@@ -1,17 +1,9 @@
-import {
-	IconButton,
-	ListItem,
-	ListItemText,
-	Menu,
-	MenuItem,
-} from "@mui/material"
 import React, { useState } from "react"
-import { MoreVert } from "@mui/icons-material"
 import { Currency } from "../../models/currency"
 
 export type ICurrencyItemProps = Currency
 
-const CurrencyItem: React.FunctionComponent<ICurrencyItemProps> = ({ displayName}) => {
+const CurrencyItem: React.FunctionComponent<ICurrencyItemProps> = ({ displayName }) => {
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const open = Boolean(anchorEl);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -20,34 +12,22 @@ const CurrencyItem: React.FunctionComponent<ICurrencyItemProps> = ({ displayName
 	const handleClose = () => {
 		setAnchorEl(null);
 	};
-	return <ListItem
-		secondaryAction={
-			<>
-				<IconButton
-					id="basic-button"
-					aria-controls={open ? 'basic-menu' : undefined}
-					aria-haspopup="true"
-					aria-expanded={open ? 'true' : undefined}
-					onClick={handleClick}
-				>
-					<MoreVert/>
-				</IconButton>
-				<Menu
-					id="basic-menu"
-					anchorEl={anchorEl}
-					open={open}
-					onClose={handleClose}
-					MenuListProps={{
-						'aria-labelledby': 'basic-button',
-					}}
-				>
-					<MenuItem onClick={handleClose}>Delete</MenuItem>
-					<MenuItem onClick={handleClose}>Edit</MenuItem>
-				</Menu>
-			</>
-		}
-	>
-		<ListItemText primary={displayName}/>
-	</ListItem>
+	return <li	>
+		<button
+			id="basic-button"
+			aria-controls={open ? 'basic-menu' : undefined}
+			aria-haspopup="true"
+			aria-expanded={open ? 'true' : undefined}
+			onClick={handleClick}
+		>
+		</button>
+		<ul
+			id="basic-menu"
+		>
+			<li onClick={handleClose}>Delete</li>
+			<li onClick={handleClose}>Edit</li>
+		</ul>
+		{displayName}
+	</li>
 }
 export default CurrencyItem

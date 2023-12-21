@@ -29,16 +29,13 @@ const projectsService = (dbRef: Database, uid: string) => {
     // },
     async create(newData: Omit<Project, "id" | "orderId">) {
       const projects = Object.values<Project>((await this.getAll()) || {})
-      // const orderId = projects.length ? projects.sort((a, b) => a?.orderId! - b?.orderId!)[projects.length - 1].orderId! + 1 : 10000
       const orderId = projects.length ? projects.sort((a, b) => a?.orderId! - b?.orderId!)[projects.length - 1].orderId! + 1 : 1
       const newItemRef = push(projectsRef, newData)
       await set(newItemRef, { ...newData, id: newItemRef.key, orderId, conditions: {} })
     },
     async swap(activeProjectId: string, targetProjectId: string) {
       const projects = await this.getAll()
-      console.log("old", projects)
       const newData = reorder(activeProjectId, targetProjectId, projects)
-      console.log("new", newData)
       await update(projectsRef, newData)
     },
     async _create(newData: Omit<Project, "id">) {
@@ -75,8 +72,17 @@ const projectsService = (dbRef: Database, uid: string) => {
           return checkSnapshotExist(snapshot)
         },
         async create(newData: Omit<Project, "id" | "orderId">) {
+          const conditions = Object.values<Project>((await this.getAll()) || {})
+          const orderId = conditions.length ? conditions.sort((a, b) => a?.orderId! - b?.orderId!)[conditions.length - 1].orderId! + 1 : 1
           const newItemRef = push(conditionsRef, newData)
-          await set(newItemRef, { ...newData, id: newItemRef.key })
+          await set(newItemRef, { ...newData, id: newItemRef.key, orderId })
+        },
+        async swap(activeConditionId: string, targetConditionId: string) {
+          const conditions = await this.getAll()
+          // console.log("old", conditions)
+          const newData = reorder(activeConditionId, targetConditionId, conditions)
+          // console.log("new", newData)
+          await update(conditionsRef, newData)
         },
         async delete(conditionId: string) {
           const conditionsRef = ref(dbRef, `${realtimeDatabasePaths.conditionsPath(uid, projectId)}/${conditionId}`)

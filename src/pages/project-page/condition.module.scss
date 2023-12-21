@@ -1,11 +1,13 @@
+@use "../../config/vars";
+
 .condition {
   display: grid;
   grid-template-rows: min-content auto;
   border-right: 1px solid black;
-}
 
-.condition:last-child {
-  border-right: none;
+  .condition:last-child {
+    border-right: none;
+  }
 }
 
 .conditionTitle {
@@ -14,7 +16,29 @@
   justify-content: space-between;
   font-weight: 600;
   border-bottom: 1px solid black;
-  padding: 6px;
+  padding: 6px 6px 6px 20px;
+  position: relative;
+
+  .dragHandler {
+    height: 18px;
+    left: -3px;
+    opacity: 0.54;
+    position: absolute;
+    width: 24px;
+    visibility: hidden;
+
+    circle {
+      fill: vars.$blackColor
+    }
+  }
+
+  &:hover {
+    .dragHandler {
+      visibility: visible;
+    }
+  }
+
+
 }
 
 .conditionBody {

@@ -4,12 +4,15 @@ import { UserContext } from "../../providers/userContext";
 import { getDatabase, onValue, ref } from "firebase/database";
 import { realtimeDatabasePaths } from "../../models/realtime-database-paths";
 import { TaskItem } from "./task-item";
-import style from "./condition.module.scss"
+import { CSS } from "@dnd-kit/utilities";
+import styles from "./condition.module.scss"
 import Modal from "../../components/modals/modal";
 import { ConditionForm } from "./condition-form";
 import projectsService from "../../services/projects";
 import { Dropdown } from "../../components/UI/dropdown/dropdown";
 import { Button } from "../../components/UI/inputs/button";
+import { useSortable } from "@dnd-kit/sortable";
+import { APP_ICONS } from "../../config/media";
 
 type IConditionColumnProps = {
   condition: TaskCondition | null
@@ -35,11 +38,7 @@ export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (
       const txRef = ref(db, realtimeDatabasePaths.tasksPath(user?.uid!, projectId, condition.id))
       onValue(txRef, (snapshot) => {
         const data = snapshot.val();
-        if (!!data) {
-          setTasks(Object.values(data))
-        } else {
-          console.log('Data not found');
-        }
+        setTasks(data ? Object.values(data) : [])
       });
     }
   }, [condition, projectId, user?.uid])
@@ -68,8 +67,24 @@ export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (
     }
   }
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: condition?.id! });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.3 : 1
+  };
+  const dragButtonStyle = { cursor: isDragging ? "grabbing" : "grab" }
+
   if (condition) {
-    return <div className={style.condition}>
+    return <div ref={setNodeRef} style={style} className={styles.condition}>
       <Modal
         title="Изменить стадию"
         isOpen={isEditModalOpen}
@@ -92,7 +107,13 @@ export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (
       >
         Вы уверены что хотите удалить стадию "{condition.displayName}"?
       </Modal>
-      <div className={style.conditionTitle}>
+      <div className={styles.conditionTitle}>
+        {APP_ICONS.dragHandler({
+          ...listeners,
+          ...attributes,
+          style: { dragButtonStyle },
+          className: styles.dragHandler
+        })}
         {condition.displayName}
         <Dropdown
           hover={false}
@@ -106,7 +127,7 @@ export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (
           <Button text="Удалить" onClick={() => setIsDeleteModalOpen(true)} />
         </Dropdown>
       </div>
-      <div className={style.conditionBody}>
+      <div className={styles.conditionBody}>
         {tasks && tasks.map(task => {
           return <TaskItem key={task.id} task={task} />
         })}
@@ -114,7 +135,7 @@ export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (
       </div>
     </div>
   } else {
-    return <div className={style.condition}>
+    return <div className={styles.condition}>
       <Modal
         title="Добавить стадию"
         isOpen={isModalOpen}
@@ -127,7 +148,7 @@ export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (
         <ConditionForm data={conditionData} onChangeAction={setConditionData} />
       </Modal>
       <div
-        className={style.conditionTitle}
+        className={styles.conditionTitle}
         style={{ cursor: "pointer" }}
         onClick={() => setIsModalOpen(true)}
       >

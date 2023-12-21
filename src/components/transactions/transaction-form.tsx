@@ -1,29 +1,19 @@
-import {
-	Box, Button, CircularProgress,
-	FormControl,
-	InputLabel,
-	MenuItem,
-	Select,
-	SelectChangeEvent,
-	TextField,
-} from "@mui/material"
 import { ChangeEvent, useContext, useEffect, useState } from "react"
 import { UserContext } from "../../providers/userContext"
 import { TransactionCategory } from "../../models/transactionCategory"
 import transactionsService from "../../services/transactions"
 import { getDatabase } from "firebase/database"
-import { green } from "@mui/material/colors"
 
 export type ITransactionFormProps = {
 	type: "income" | "outcome"
 }
 
-const TransactionForm: React.FunctionComponent<ITransactionFormProps> = ({type}) => {
-	const {settings, user} = useContext(UserContext)
+const TransactionForm: React.FunctionComponent<ITransactionFormProps> = ({ type }) => {
+	const { settings, user } = useContext(UserContext)
 	const [loading, setLoading] = useState(false)
 	const [incomesCat, setIncomesCat] = useState<TransactionCategory[]>([])
 	const [outcomesCat, setOutcomesCat] = useState<TransactionCategory[]>([])
-	const [form, setForm] = useState({category: "", currency: "", desc: "", amount: ""})
+	const [form, setForm] = useState({ category: "", currency: "", desc: "", amount: "" })
 	const text = type === "income" ?
 		{
 			title: "Add income",
@@ -50,7 +40,7 @@ const TransactionForm: React.FunctionComponent<ITransactionFormProps> = ({type})
 		if (user?.uid) {
 			setLoading(true)
 			await transactionsService(getDatabase(), user?.uid, type)
-				.create(type,{
+				.create(type, {
 					id: "",
 					amount: form.amount,
 					currencyId: form.currency,
@@ -60,100 +50,70 @@ const TransactionForm: React.FunctionComponent<ITransactionFormProps> = ({type})
 					creationDate: "",
 					updateDate: "",
 					deletionDate: "",
-					...type === "income" ? {incomeCategoryId: form.category} : { outcomeCategoryId: form.category}
+					...type === "income" ? { incomeCategoryId: form.category } : { outcomeCategoryId: form.category }
 				})
 			setLoading(false)
 		}
 
 	}
 
-	const handleChange = (event: SelectChangeEvent | ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, key: keyof typeof form ) => {
+	const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>, key: keyof typeof form) => {
 		setForm(prevState => ({
 			...prevState,
 			[key]: event.target.value
 		}))
 	};
-	return <Box
-		component="form"
-		sx={{
-			'& .MuiTextField-root': { m: 1, width: '25ch' },
-		}}
-		noValidate
-		autoComplete="off"
-	>
+	return <div>
 		<div>
-			<TextField
-				error={false}
+			<input
 				id="outlined-error"
-				label="Amount"
 				placeholder="Please enter amount"
-				helperText=""
 				value={form.amount}
 				onChange={e => handleChange(e, "amount")}
 				required
 			/>
-			<TextField
-				error={false}
+			<input
 				id="outlined-error-helper-text"
-				label="Description"
-				helperText=""
 				value={form.desc}
 				onChange={e => handleChange(e, "desc")}
 			/>
-			<FormControl sx={{ m: 1, minWidth: 180 }}>
-				<InputLabel id="currency-select-helper-label">Currency</InputLabel>
-				<Select
-					labelId="currency-select-helper-label"
+			<form>
+				<input id="currency-select-helper-label">Currency</input>
+				<select
 					id="currency-select-helper"
 					value={form.currency}
-					label="Currency"
 					onChange={e => handleChange(e, "currency")}
 				>
 					{Object.values(settings.currencies).map(val => {
-						return <MenuItem key={val.displayName} value={val.id}>{val.displayName}</MenuItem>
+						return <div key={val.displayName} className={val.id}>{val.displayName}</div>
 					})}
-				</Select>
+				</select>
 				{/*<FormHelperText>With label + helper text</FormHelperText>*/}
-			</FormControl>
-			<FormControl sx={{ m: 1, minWidth: 180 }}>
-				<InputLabel id="category-select-helper-label">Category</InputLabel>
-				<Select
-					labelId="category-select-helper-label"
+			</form>
+			<form >
+				<input id="category-select-helper-label">Category</input>
+				<select
 					id="category-select-helper"
 					value={form.category}
-					label="Category"
 					onChange={e => handleChange(e, "category")}
 				>
-					<MenuItem value="">
+					<div className="">
 						<em>None</em>
-					</MenuItem>
+					</div>
 					{(type === "income" ? incomesCat : outcomesCat).map(val => {
-						return <MenuItem key={val.displayName} value={val.id}>{val.displayName}</MenuItem>
+						return <div key={val.displayName} className={val.id}>{val.displayName}</div>
 					})}
-				</Select>
+				</select>
 				{/*<FormHelperText>With label + helper text</FormHelperText>*/}
-			</FormControl>
+			</form>
 		</div>
-		<Box sx={{ m: 1, position: "relative", display: "inline-grid" }}>
-			<Button
+		<div >
+			<button
 				disabled={loading}
 				onClick={() => onSave()}
-				variant="contained">{text.buttonText}</Button>
-			{loading && (
-				<CircularProgress
-					size={24}
-					sx={{
-						color: green[500],
-						position: 'absolute',
-						top: '50%',
-						left: '50%',
-						marginTop: '-12px',
-						marginLeft: '-12px',
-					}}
-				/>
-			)}
-		</Box>
-	</Box>
+			>{text.buttonText}</button>
+		</div>
+	</div>
 }
 
 export default TransactionForm

@@ -1,4 +1,3 @@
-import { List, ListSubheader, Typography } from "@mui/material"
 import TransactionItem from "./transaction-item"
 import React, { useContext, useEffect, useState } from "react"
 import { UserContext } from "../../providers/userContext"
@@ -48,15 +47,10 @@ const TransactionList: React.FunctionComponent<ITransactionListProps> = ({ type 
 	}
 
 	if (error) {
-		return <Typography>Something went wrong</Typography>
+		return <p>Something went wrong</p>
 	}
 
-	return <List
-		subheader={
-			<ListSubheader component="div" id="nested-list-subheader">
-				{type === "incomes" ? "Icomes" : "Expenses"} {summary}
-			</ListSubheader>
-		}
+	return <ul
 	>
 		{txs.map(tx => {
 			const catId = "outcomeCategoryId" in tx ? tx.outcomeCategoryId : tx.incomeCategoryId
@@ -67,6 +61,6 @@ const TransactionList: React.FunctionComponent<ITransactionListProps> = ({ type 
 				currency={""}
 			/>
 		})}
-	</List>
+	</ul>
 }
 export default TransactionList
