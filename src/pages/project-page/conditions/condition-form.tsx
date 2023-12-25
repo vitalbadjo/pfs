@@ -1,6 +1,6 @@
 import React from "react"
 import { TaskConditionData } from "./condition-col"
-import { TextInput } from "../../components/UI/inputs/textInput"
+import { TextInput } from "../../../components/UI/inputs/textInput"
 
 type IConditionForm = {
   data: TaskConditionData

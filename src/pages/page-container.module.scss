@@ -1,12 +1,13 @@
 $appBarWidth: 200px;
 $headerHeight: 62px;
 $whiteBackground: rgb(255, 255, 255);
+$grayBackground: rgb(201, 201, 201);
 $darkBorders: rgb(63, 63, 63);
 
 @mixin pageStyles {
   min-height: 100%;
   padding: 10px;
-  background-color: $whiteBackground;
+  background-color: $grayBackground;
 }
 
 .pageContainer {

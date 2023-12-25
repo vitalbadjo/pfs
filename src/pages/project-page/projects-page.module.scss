@@ -1,4 +1,16 @@
 .projectGrid {
   display: grid;
+  grid-gap: 6px;
   height: 100%;
+  grid-template-rows: 32px auto;
+}
+
+.projectConditions {
+  display: grid;
+  grid-gap: 6px;
+}
+
+.projectTasks {
+  display: grid;
+  grid-gap: 6px;
 }

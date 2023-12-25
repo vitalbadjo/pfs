@@ -1,0 +1,55 @@
+@use "../../../config/vars";
+@use "../../../config/mixins" as fonts;
+
+.task {
+  border: 1px solid black;
+  border-radius: 3px;
+  padding: 3px;
+  cursor: pointer;
+  background-color: vars.$white;
+  position: relative;
+
+  // margin-bottom: 6px;
+  .dragHandler {
+    height: 18px;
+    left: 4px;
+    opacity: 0.54;
+    position: absolute;
+    width: 12px;
+    visibility: hidden;
+
+    circle {
+      fill: vars.$blackColor
+    }
+  }
+
+  &:hover {
+    .dragHandler {
+      visibility: visible;
+    }
+  }
+}
+
+.taskHeader {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 20px;
+  padding-top: 3px
+}
+
+.taskTitle {
+  @include fonts.fsb;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 150px;
+}
+
+.taskDesc {
+  @include fonts.fs;
+  padding: 4px;
+  max-height: 69px;
+  overflow: hidden;
+}

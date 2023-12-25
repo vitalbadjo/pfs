@@ -1,6 +1,6 @@
-import React, { useState } from "react"
-import { Task } from "../../models/projects-model"
-import { TextInput } from "../../components/UI/inputs/textInput"
+import React from "react"
+import { Task } from "../../../models/projects-model"
+import { TextInput } from "../../../components/UI/inputs/textInput"
 import { TaskData } from "./task-item"
 
 type ITaskForm = {

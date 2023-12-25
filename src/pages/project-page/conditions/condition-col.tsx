@@ -1,18 +1,16 @@
-import { Task, TaskCondition } from "../../models/projects-model";
-import { useContext, useEffect, useState } from "react";
-import { UserContext } from "../../providers/userContext";
-import { getDatabase, onValue, ref } from "firebase/database";
-import { realtimeDatabasePaths } from "../../models/realtime-database-paths";
-import { TaskItem } from "./task-item";
+import { TaskCondition } from "../../../models/projects-model";
+import { useContext, useState } from "react";
+import { UserContext } from "../../../providers/userContext";
+import { getDatabase } from "firebase/database";
 import { CSS } from "@dnd-kit/utilities";
 import styles from "./condition.module.scss"
-import Modal from "../../components/modals/modal";
+import Modal from "../../../components/modals/modal";
 import { ConditionForm } from "./condition-form";
-import projectsService from "../../services/projects";
-import { Dropdown } from "../../components/UI/dropdown/dropdown";
-import { Button } from "../../components/UI/inputs/button";
+import projectsService from "../../../services/projects";
+import { Dropdown } from "../../../components/UI/dropdown/dropdown";
+import { Button } from "../../../components/UI/inputs/button";
 import { useSortable } from "@dnd-kit/sortable";
-import { APP_ICONS } from "../../config/media";
+import { APP_ICONS } from "../../../config/media";
 
 type IConditionColumnProps = {
   condition: TaskCondition | null
@@ -26,22 +24,10 @@ export type TaskConditionData = Omit<TaskCondition, "id" | "projectId" | "orderI
 export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (props) => {
   const { condition, projectId } = props
   const { user } = useContext(UserContext)
-  const [tasks, setTasks] = useState<Task[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [conditionData, setConditionData] = useState<TaskConditionData>(defaultConditionData)
-
-  useEffect(() => {
-    if (projectId && condition) {
-      const db = getDatabase()
-      const txRef = ref(db, realtimeDatabasePaths.tasksPath(user?.uid!, projectId, condition.id))
-      onValue(txRef, (snapshot) => {
-        const data = snapshot.val();
-        setTasks(data ? Object.values(data) : [])
-      });
-    }
-  }, [condition, projectId, user?.uid])
 
   const onSaveCondition = async () => {
     if (user?.uid) {
@@ -111,7 +97,7 @@ export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (
         {APP_ICONS.dragHandler({
           ...listeners,
           ...attributes,
-          style: { dragButtonStyle },
+          style: dragButtonStyle,
           className: styles.dragHandler
         })}
         {condition.displayName}
@@ -126,12 +112,6 @@ export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (
           }} />
           <Button text="Удалить" onClick={() => setIsDeleteModalOpen(true)} />
         </Dropdown>
-      </div>
-      <div className={styles.conditionBody}>
-        {tasks && tasks.map(task => {
-          return <TaskItem key={task.id} task={task} />
-        })}
-        <TaskItem condId={condition.id} projId={projectId} />
       </div>
     </div>
   } else {

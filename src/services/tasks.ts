@@ -2,36 +2,69 @@ import { Database, get, ref, remove, update, push, set } from "firebase/database
 import { realtimeDatabasePaths } from "../models/realtime-database-paths"
 import { checkSnapshotExist } from "./utils"
 import { Task } from "../models/projects-model"
+import { reorderBetweenLists } from "../utils/utils"
+import { TasksRaw } from "../pages/project-page/tasks/tasks"
 
-const tasksService = (dbRef: Database, uid: string, projectId: string, conditionId: string) => {
-  const tasksRef = ref(
+const tasksService = (dbRef: Database, uid: string, projectId: string) => {
+  const tasksOfProjectRef = ref(
     dbRef,
-    realtimeDatabasePaths.tasksPath(uid, projectId, conditionId)
+    realtimeDatabasePaths.tasksPathByProject(uid, projectId)
+  )
+  const tasksOfConditionRef = (conditionId: string) => ref(
+    dbRef,
+    realtimeDatabasePaths.tasksPathByCondition(uid, projectId, conditionId)
   )
   return {
-    async getAll() {
-      const snapshot = await get(tasksRef)
+    async getAllFromCondition(conditionId: string) {
+
+      const snapshot = await get(tasksOfConditionRef(conditionId))
       return checkSnapshotExist(snapshot)
     },
-    async create(newData: Omit<Task, "id" | "projectId" | "taskCondition">) {
-      const newItemRef = push(tasksRef, newData)
+    async getAllFromProject() {
+      const snapshot = await get(tasksOfProjectRef)
+      return checkSnapshotExist(snapshot)
+    },
+    async create(newData: Omit<Task, "id" | "projectId" | "taskCondition">, conditionId: string) {
+      const tasks = Object.values<Task>((await this.getAllFromCondition(conditionId)) || {})
+      const orderId = tasks.length ? tasks.sort((a, b) => +a?.orderId! - +b?.orderId!)[tasks.length - 1].orderId! + 1 : 1
+      const newItemRef = push(tasksOfConditionRef(conditionId), newData)
       try {
-        await set(newItemRef, { ...newData, id: newItemRef.key, projectId, taskCondition: conditionId })
+        await set(newItemRef, { ...newData, id: newItemRef.key, projectId, taskCondition: conditionId, orderId })
       } catch (error) {
         console.log("Task creation error: ", error)
       }
 
     },
-    async delete(taskId: string) {
-      const transactionRef = ref(dbRef, `${realtimeDatabasePaths.tasksPath(uid, projectId, conditionId)}/${taskId}`)
+    async swap(
+      activeTaskId: string,
+      targetTaskId: string,
+      activeConditionID: string,
+      targetConditionId: string
+    ) {
+      const projectTasks = await this.getAllFromProject()
+      const newData = reorderBetweenLists(
+        `${activeConditionID}/${activeTaskId}`,
+        `${targetConditionId}/${targetTaskId}`,
+        projectTasks
+      )
+      await update(tasksOfProjectRef, newData)
+    },
+    async updateBatch(tasksRaw: TasksRaw) {
+      const transactionRef = ref(dbRef, `${realtimeDatabasePaths.tasksPathByProject(uid, projectId)}`)
+      await update(transactionRef, tasksRaw)
+      console.log("Task batch updated")
+    },
+    async delete(taskId: string, conditionId: string) {
+      //todo reorder when removing
+      const transactionRef = ref(dbRef, `${realtimeDatabasePaths.tasksPathByCondition(uid, projectId, conditionId)}/${taskId}`)
       remove(transactionRef).then(() => {
         console.log("Task deleted")
         // todo show popup
       }).catch(console.log)
     },
-    update(taskId: string, newData: Partial<Task>) {
-      const transactionRef = ref(dbRef, `${realtimeDatabasePaths.tasksPath(uid, projectId, conditionId)}/${taskId}`)
-      update(transactionRef, newData).then(() => {
+    update(conditionId: string, taskId: string, newData: Partial<Task>) {
+      const transactionRef = ref(dbRef, `${realtimeDatabasePaths.tasksPathByCondition(uid, projectId, conditionId)}/${taskId}`)
+      update(transactionRef, newData).then((v) => {
         console.log("Task updated")
         // todo show popup
       }).catch(console.log)
