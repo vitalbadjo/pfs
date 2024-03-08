@@ -19,8 +19,6 @@ export const ProjectsPage: React.FunctionComponent = () => {
   // state for dnd
   const [conditionsRaw, setConditionsRaw] = useState<ConditionsRaw>({})
 
-
-
   useEffect(() => {
 
     if (id) {
@@ -42,7 +40,7 @@ export const ProjectsPage: React.FunctionComponent = () => {
   }, [user?.uid, id])
 
   const conditionsArray = useMemo(() => {
-    return Object.values(conditionsRaw)
+    return Object.values(conditionsRaw).sort((a, b) => a.orderId - b.orderId)
   }, [conditionsRaw])
 
   if (!id) {

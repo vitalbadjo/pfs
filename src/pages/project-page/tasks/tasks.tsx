@@ -1,27 +1,24 @@
 import { FunctionComponent, useContext, useEffect, useState } from "react"
-import styles from "../projects-page.module.scss"
-import { Task, TaskCondition } from "../../../models/projects-model"
-import { TaskColumn } from "./tasks-col"
-import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent, KeyboardSensor, PointerSensor, TouchSensor, closestCenter, closestCorners, useSensor, useSensors } from "@dnd-kit/core"
+import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core"
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable"
-import { TaskItem } from "./task-item"
-import { Unsubscribe, getDatabase, onValue, ref } from "firebase/database"
+import { Task, TaskCondition, TasksGroups, TasksRaw } from "../../../models/projects-model"
 import { UserContext } from "../../../providers/userContext"
+import { Unsubscribe, getDatabase, onValue, ref } from "firebase/database"
 import { realtimeDatabasePaths } from "../../../models/realtime-database-paths"
-import { reorderBetweenLists, reorderSimple } from "../../../utils/utils"
+import { arrayMove, groupsToRaw, insertAtIndex, rawToGroups, removeAtIndex } from "../../../utils/tasks.utils"
+import { TaskItem } from "./task-item"
+import styles from "../projects-page.module.scss"
+import { TaskColumn } from "./tasks-col"
 import tasksService from "../../../services/tasks"
 
 let unsubscribe: Unsubscribe = () => { }
-
-type ConditionId = string
-type TaskId = string
-export type TasksRaw = Record<ConditionId, Record<TaskId, Task>>
-type TasksGroups = Record<ConditionId, Task[]>
 
 type ITasks = {
   id: string//Project Id
   conditionsArray: TaskCondition[]
 }
+
+export type TaskData = Omit<Task, "projectId" | "taskCondition" | "id">
 
 export const Tasks: FunctionComponent<ITasks> = (props) => {
   const { id, conditionsArray } = props
@@ -30,8 +27,8 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
   const [tasksRaw, setTasksRaw] = useState<TasksRaw>({})
   const [tasksGroups, setTasksGroups] = useState<TasksGroups>({});
   const [activeTask, setActiveTask] = useState<Task | null>(null);
-  useEffect(() => {
 
+  useEffect(() => {
     if (id) {
       unsubscribe()
       const db = getDatabase()
@@ -41,11 +38,7 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
         const data: TasksRaw = snapshot.val();
         if (!!data) {
           setTasksRaw(data)
-          const tg: TasksGroups = {}
-          Object.keys(data).forEach(groupId => {
-            tg[groupId] = Object.values(data[groupId]).sort((a, b) => +a.orderId - +b.orderId)
-          })
-          setTasksGroups(tg)
+          setTasksGroups(rawToGroups(conditionsArray, data))
         } else {
           setTasksRaw({})
           setTasksGroups({})
@@ -54,93 +47,157 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
       });
     }
     return unsubscribe
-  }, [user?.uid, id])
+  }, [user?.uid, id, conditionsArray])
+
+  useEffect(() => {
+    if (Object.keys(tasksGroups).length) {
+      const db = getDatabase()
+      tasksService(db, user?.uid!, id).updateBatch(groupsToRaw(tasksGroups))
+    }
+
+  }, [tasksGroups])
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(MouseSensor),
     useSensor(TouchSensor),
     useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates
+      coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
-  const handleDragStart = (e: DragStartEvent) => {
-    setActiveTask(tasksRaw[e.active.data.current?.sortable.containerId][e.active.id])
+  const handleDragStart = ({ active }: DragStartEvent) => {
+    const container = active?.data?.current?.sortable.containerId
+    setActiveTask(tasksGroups[container].find(el => el.id === active.id)!)
+  };
 
-  }
-  const handleDragCancel = () => setActiveTask(null)
-  const handleDragOver = ({ over, active }: DragOverEvent) => {
+  const handleDragCancel = () => setActiveTask(null);
+
+  const handleDragOver = ({ active, over }: DragOverEvent) => {
     const overId = over?.id;
-
     if (!overId) {
       return;
     }
-    const activeContainer = active.data.current?.sortable.containerId;
+
+    const activeContainer = active?.data?.current?.sortable.containerId;
     const overContainer = over.data.current?.sortable.containerId || over.id;
+
     if (activeContainer !== overContainer) {
-      const newRaw = reorderBetweenLists(`${activeContainer}/${active.id}`, `${overContainer}/${over.id}`, tasksRaw)
-      setTasksRaw(() => {
-        return newRaw
-      })
-      const tg: TasksGroups = {}
-      Object.keys(newRaw).forEach(groupId => {
-        tg[groupId] = Object.values(newRaw[groupId]).sort((a, b) => +a.orderId - +b.orderId)
-      })
-      setTasksGroups(tg)
+      setTasksGroups((itemGroups) => {
+        const activeIndex = active?.data?.current?.sortable.index;
+        const overIndex =
+          over.id in itemGroups
+            ? itemGroups[overContainer].length + 1
+            : over?.data?.current?.sortable.index;
+
+        const newGroups = moveBetweenContainers(
+          itemGroups,
+          activeContainer,
+          activeIndex,
+          overContainer,
+          overIndex,
+          activeTask!
+        );
+        const raw = groupsToRaw(newGroups)
+        return rawToGroups(conditionsArray, raw)
+      });
+    } else {
+      // const activeIndex = active?.data?.current?.sortable.index;
+      // const overIndex =
+      //   over.id in tasksGroups
+      //     ? tasksGroups[overContainer].length + 1
+      //     : over?.data?.current?.sortable.index;
+      // setTasksGroups((itemGroups) => {
+      //   return {
+      //     ...itemGroups,
+      //     [overContainer]: arrayMove(
+      //       itemGroups[overContainer],
+      //       activeIndex,
+      //       overIndex,
+      //     ),
+      //   };
+      // })
     }
-    else {
-      const newRaw: TasksRaw = {
-        ...tasksRaw,
-        [activeContainer]: reorderSimple(`${active.id}`, `${overId}`, tasksRaw[activeContainer]),
-      }
-      setTasksRaw(newRaw)
-      const tg: TasksGroups = {}
-      Object.keys(newRaw).forEach(groupId => {
-        tg[groupId] = Object.values(newRaw[groupId]).sort((a, b) => +a.orderId - +b.orderId)
-      })
-      setTasksGroups(tg)
+  };
+
+  const handleDragEnd = async ({ active, over }: DragEndEvent) => {
+    if (!over) {
+      setActiveTask(null);
+      return;
     }
-  }
-  const handleDragEnd = async (e: DragEndEvent) => {
-    const { active, over } = e
-    const overContainer = over?.data.current?.sortable.containerId || over?.id;
-    const activeId = `${active.id}`
-    const targetId = `${over?.id}`
-    const newRaw: TasksRaw = tasksRaw
-    newRaw[overContainer] = reorderSimple(activeId, targetId, tasksRaw[overContainer])
-    setTasksRaw(newRaw)
-    const tg: TasksGroups = {}
-    Object.keys(newRaw).forEach(groupId => {
-      tg[groupId] = Object.values(newRaw[groupId]).sort((a, b) => +a.orderId - +b.orderId)
-    })
-    setTasksGroups(tg)
-    const db = getDatabase()
-    await tasksService(db, user?.uid!, id).updateBatch(newRaw)
-  }
+    let newItems;
+    if (active.id !== over.id) {
+      const activeContainer = active?.data?.current?.sortable.containerId;
+      const overContainer = over.data.current?.sortable.containerId || over.id;
+      const activeIndex = active?.data?.current?.sortable.index;
+      const overIndex =
+        over.id in tasksGroups
+          ? tasksGroups[overContainer].length + 1
+          : over?.data?.current?.sortable.index;
 
-  return <DndContext
-    sensors={sensors}
-    onDragStart={handleDragStart}
-    onDragCancel={handleDragCancel}
-    onDragOver={handleDragOver}
-    onDragEnd={handleDragEnd}
-    collisionDetection={closestCorners}
-  >
-    <div className={styles.projectTasks} style={{ gridTemplateColumns: `repeat(${conditionsArray?.length! + 1}, 200px)` }}>
+      setTasksGroups((itemGroups) => {
 
-      {conditionsArray && conditionsArray.sort((a, b) => +a.orderId - +b.orderId).map(condition => {
-        return <TaskColumn
-          key={`${condition.id}`}
-          condition={condition}
-          projectId={id}
-          tasks={tasksGroups[condition.id] || []}
-        />
-      })}
+        if (activeContainer === overContainer) {
+          newItems = {
+            ...itemGroups,
+            [overContainer]: arrayMove(
+              itemGroups[overContainer],
+              activeIndex,
+              overIndex,
+            ),
+          };
 
-    </div>
-    <DragOverlay>
-      {activeTask ? <TaskItem id={activeTask.id} task={activeTask} /> : null}
-    </DragOverlay>
-  </DndContext>
+        } else {
+          newItems = moveBetweenContainers(
+            itemGroups,
+            activeContainer,
+            activeIndex,
+            overContainer,
+            overIndex,
+            activeTask!
+          );
+
+        }
+
+        newItems = groupsToRaw(newItems)
+        return rawToGroups(conditionsArray, newItems);
+      });
+    }
+    setActiveTask(null);
+  };
+
+  const moveBetweenContainers = (
+    items: TasksGroups,
+    activeContainer: string,
+    activeIndex: string,
+    overContainer: string,
+    overIndex: string,
+    item: Task
+  ) => {
+    return {
+      ...items,
+      [activeContainer]: removeAtIndex(items[activeContainer], +activeIndex),
+      [overContainer]: insertAtIndex(items[overContainer], +overIndex, item),
+    };
+  };
+
+  return (
+    <DndContext
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragCancel={handleDragCancel}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+    >
+      <div className={styles.projectTasks} style={{ gridTemplateColumns: `repeat(${Object.keys(tasksGroups)?.length! + 1}, 200px)` }}>
+        {Object.keys(tasksGroups).map((group) => (
+          // <Droppable id={group} items={tasksGroups[group]} key={group} />
+          <TaskColumn conditionId={group} tasks={tasksGroups[group]} key={group} projectId={id} />
+        ))}
+      </div>
+      <DragOverlay >
+        {activeTask ? <TaskItem id={activeTask.id} task={activeTask} dragOverlay /> : null}
+      </DragOverlay>
+    </DndContext>
+  )
 }
 

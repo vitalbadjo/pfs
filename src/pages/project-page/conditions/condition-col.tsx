@@ -93,14 +93,15 @@ export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (
       >
         Вы уверены что хотите удалить стадию "{condition.displayName}"?
       </Modal>
-      <div className={styles.conditionTitle}>
+      <div className={styles.conditionHeader}>
         {APP_ICONS.dragHandler({
           ...listeners,
           ...attributes,
           style: dragButtonStyle,
           className: styles.dragHandler
         })}
-        {condition.displayName}
+        <div className={styles.conditionTitle}>{condition.displayName}</div>
+
         <Dropdown
           hover={false}
         >
@@ -128,11 +129,11 @@ export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (
         <ConditionForm data={conditionData} onChangeAction={setConditionData} />
       </Modal>
       <div
-        className={styles.conditionTitle}
+        className={styles.conditionHeader}
         style={{ cursor: "pointer" }}
         onClick={() => setIsModalOpen(true)}
       >
-        Добавить стадию
+        <div className={styles.conditionTitle}>Добавить стадию</div>
       </div>
     </div>
   }

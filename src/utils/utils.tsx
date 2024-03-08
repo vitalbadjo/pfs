@@ -1,3 +1,4 @@
+import { Task } from "../models/projects-model";
 
 export const insertAtIndex: <T>(array: T[], index: number, item: T) => T[] = (array, index, item) => {
   return [...array.slice(0, index), item, ...array.slice(index)];
@@ -49,6 +50,40 @@ export const reorderSimple = (activeId: string, targetId: string, data: Record<s
   return data
 }
 
+export const reorderObject = (activeId: string, targetId: string, data: Task[]) => {
+
+  if (data.length) {
+    const { id: activeItemId, orderId: activeItemOrderId } = data.find(el => el.id === activeId)!
+    const { id: targetItemId, orderId: targetItemOrderId } = data.find(el => el.id === targetId)!
+
+    if (Math.abs(+activeItemOrderId - +targetItemOrderId) === 1) {// if only swap two elements needed
+      data.find(el => el.id === activeItemId)!.orderId = targetItemOrderId
+      data.find(el => el.id === targetItemId)!.orderId = activeItemOrderId
+    } else {
+      if (activeItemOrderId > targetItemOrderId) {
+        data.forEach(v => {// смещаем все что ниже таргета на 1
+          if (v.orderId >= targetItemOrderId && v.orderId < activeItemOrderId) {
+            v.orderId = +v.orderId + 1
+          }
+        })
+        data.find(el => el.id === activeItemId)!.orderId = targetItemOrderId
+      } else {
+        data.forEach(v => { // все что больше активного и меньше таргета смещаем на -1
+          if (v.orderId <= targetItemOrderId && v.orderId > activeItemOrderId) {
+            v.orderId = +v.orderId - 1
+          }
+        })
+        data.find(el => el.id === activeItemId)!.orderId = targetItemOrderId
+      }
+    }
+    return Object.values(data)
+  } else {
+    return []
+  }
+
+}
+
+
 
 const reorderRemove = (activeId: string, data: Record<string, ReorderType>) => {
   const orderIdToDelete = data[activeId].orderId
@@ -63,16 +98,22 @@ const reorderRemove = (activeId: string, data: Record<string, ReorderType>) => {
 
 const reorderAdd = (activeObject: ReorderType, targetId: string, targetParentId: string, data: Record<string, ReorderType>) => {
   // const isActiveIdInData = activeId in Object.keys(data)
-  const isTargetIdInData = targetId in Object.keys(data)
-  if (isTargetIdInData) {
-    Object.values(data).filter(v => +v.orderId >= +data[targetId].orderId).forEach(v => {
-      data[v.id].orderId = +data[v.id].orderId + 1//`${}`
-    })
-    data[activeObject.id] = { ...activeObject, orderId: data[targetId].orderId }
+  if (data) {
+    const isTargetIdInData = targetId in Object.keys(data)
+    if (isTargetIdInData) {
+      Object.values(data).filter(v => +v.orderId >= +data[targetId].orderId).forEach(v => {
+        data[v.id].orderId = +data[v.id].orderId + 1//`${}`
+      })
+      data[activeObject.id] = { ...activeObject, orderId: data[targetId].orderId }
+    } else {
+      const lastIndex = Object.values(data).length + 1
+      data[activeObject.id] = { ...activeObject, orderId: lastIndex, taskCondition: targetParentId }
+    }
   } else {
-    const lastIndex = Object.values(data).length + 1
-    data[activeObject.id] = { ...activeObject, orderId: lastIndex, taskCondition: targetParentId }
+    data = {}
+    data[targetParentId] = activeObject
   }
+
   return data
 }
 
@@ -88,12 +129,19 @@ export const reorderBetweenLists = (activeId: string, targetId: string, data: Re
     data[activeCondition] = reorderSimple(activeTask, targetTask, data[activeCondition])
     return data
   } else {
-    //removing
-    const activeObject = { ...data[activeCondition][activeTask] }
-    data[activeCondition] = reorderRemove(activeTask, data[activeCondition])
-    //adding
-    data[targetCondition] = reorderAdd(activeObject, targetTask, targetCondition, data[targetCondition])
-    data[targetCondition] = reorderSimple(activeTask, targetTask, data[targetCondition])
+    if (targetTask !== targetCondition) {
+      //removing
+      const activeObject = { ...data[activeCondition][activeTask] }
+      data[activeCondition] = reorderRemove(activeTask, data[activeCondition])
+      //adding
+      if (targetTask !== targetCondition) {
+        data[targetCondition] = reorderAdd(activeObject, targetTask, targetCondition, data[targetCondition])
+        data[targetCondition] = reorderSimple(activeTask, targetTask, data[targetCondition])
+      } else {
+        data[targetCondition] = { ...(data[targetCondition] || {}) }
+        data[targetCondition][activeTask] = { ...activeObject, orderId: 1 }
+      }
+    }
     return data
   }
 }

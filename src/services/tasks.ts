@@ -3,7 +3,7 @@ import { realtimeDatabasePaths } from "../models/realtime-database-paths"
 import { checkSnapshotExist } from "./utils"
 import { Task } from "../models/projects-model"
 import { reorderBetweenLists } from "../utils/utils"
-import { TasksRaw } from "../pages/project-page/tasks/tasks"
+import { TasksRaw } from "../pages/project-page/tasks/tasks_bak"
 
 const tasksService = (dbRef: Database, uid: string, projectId: string) => {
   const tasksOfProjectRef = ref(
@@ -51,8 +51,13 @@ const tasksService = (dbRef: Database, uid: string, projectId: string) => {
     },
     async updateBatch(tasksRaw: TasksRaw) {
       const transactionRef = ref(dbRef, `${realtimeDatabasePaths.tasksPathByProject(uid, projectId)}`)
-      await update(transactionRef, tasksRaw)
-      console.log("Task batch updated")
+      try {
+        await update(transactionRef, tasksRaw)
+        console.log("Task batch updated")
+      } catch (error) {
+        console.log("Task batch not updated")
+      }
+
     },
     async delete(taskId: string, conditionId: string) {
       //todo reorder when removing

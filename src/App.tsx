@@ -6,6 +6,7 @@ import { initializeApp } from "firebase/app"
 import { config } from "./config/config"
 import AuthRoute from "./components/auth-route"
 import { ProjectsPage } from './pages/project-page/projects-page';
+import { Tasks } from './pages/project-page/tasks/tasks';
 
 initializeApp(config.firebase)
 

@@ -1,31 +1,31 @@
 import { useDroppable } from "@dnd-kit/core";
-import { Task, TaskCondition } from "../../../models/projects-model";
+import { Task } from "../../../models/projects-model";
 import { TaskItem } from "./task-item";
 import styles from "./tasks-col.module.scss"
-import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 
 type IConditionColumnProps = {
-  condition: TaskCondition
+  conditionId: string
   projectId: string
   tasks: Task[]
 }
 
 export const TaskColumn: React.FunctionComponent<IConditionColumnProps> = (props) => {
-  const { condition, projectId, tasks } = props
-  const { setNodeRef } = useDroppable({ id: condition.id });
-
+  const { conditionId, tasks } = props
+  const { setNodeRef } = useDroppable({ id: conditionId });
+  // console.log(tasks)
 
   return <SortableContext
-    id={condition.id}
+    id={conditionId}
     items={tasks}//{Object.values(tasks).map(v => `${condition.id}/${v.id}`)}
-    strategy={rectSortingStrategy}
+    strategy={verticalListSortingStrategy}
   >
     <div
       ref={setNodeRef}
       className={styles.tasksCol}
       style={{ gridTemplateRows: `repeat(${tasks.length + 3}, min-content)` }}
     >
-      {tasks && tasks.map(task => {
+      {tasks.map(task => {
         return <TaskItem
           id={task.id}
           key={task.id}
@@ -33,7 +33,7 @@ export const TaskColumn: React.FunctionComponent<IConditionColumnProps> = (props
           task={task}
         />
       })}
-      <TaskItem id={`${condition.id}addtask`} condId={condition.id} projId={projectId} />
+      {/* <TaskItem id={`${conditionId}addtask`} condId={conditionId} projId={projectId} /> */}
     </div>
   </SortableContext>
 }

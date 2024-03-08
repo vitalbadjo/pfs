@@ -1,4 +1,5 @@
 @use "../../../config/vars";
+@use "../../../config/mixins" as fonts;
 
 .condition {
   display: grid;
@@ -6,13 +7,21 @@
   background-color: vars.$white;
 }
 
-.conditionTitle {
+.conditionHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-weight: 600;
   padding: 6px 6px 6px 20px;
   position: relative;
+
+  .conditionTitle {
+    @include fonts.fsb;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 150px;
+  }
 
   .dragHandler {
     height: 18px;

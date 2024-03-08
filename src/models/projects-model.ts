@@ -26,3 +26,8 @@ export type Task = KanbanBaseFields & {
   projectId: Project["id"]
   taskCondition: TaskCondition["id"]
 }
+
+export type ConditionId = string
+export type TaskId = string
+export type TasksRaw = Record<ConditionId, Record<TaskId, Task>>
+export type TasksGroups = Record<ConditionId, Task[]>

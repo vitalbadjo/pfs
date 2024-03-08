@@ -2,12 +2,14 @@
 @use "../../../config/mixins" as fonts;
 
 .task {
+  box-sizing: border-box;
   border: 1px solid black;
   border-radius: 3px;
   padding: 3px;
   cursor: pointer;
   background-color: vars.$white;
   position: relative;
+  overflow: hidden;
 
   // margin-bottom: 6px;
   .dragHandler {
@@ -46,11 +48,14 @@
   white-space: nowrap;
   overflow: hidden;
   width: 150px;
+  user-select: none;
 }
 
 .taskDesc {
   @include fonts.fs;
-  padding: 4px;
+  padding: 0 4px 4px 4px;
   max-height: 69px;
+  word-break: break-word;
   overflow: hidden;
+  user-select: none;
 }

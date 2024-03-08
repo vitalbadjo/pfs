@@ -1,13 +1,11 @@
 import { Task } from "../../../models/projects-model";
 import { useContext, useState } from "react";
 import styles from "./task.module.scss"
-import { TaskForm } from "./task-form";
+import { TaskForm } from "./task-add-form";
 import Modal from "../../../components/modals/modal";
 import { UserContext } from "../../../providers/userContext";
 import { getDatabase } from "firebase/database";
 import tasksService from "../../../services/tasks";
-import { Dropdown } from "../../../components/UI/dropdown/dropdown";
-import { Button } from "../../../components/UI/inputs/button";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { APP_ICONS } from "../../../config/media";
@@ -17,11 +15,13 @@ type ITaskItemProps = {
   condId?: string
   projId?: string
   id: string
+  dragOverlay?: boolean
 }
 
 export type TaskData = Omit<Task, "projectId" | "taskCondition" | "id">
 const defaultTaskData: TaskData = { displayName: "", orderId: 0 }
-export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId, projId, id }) => {
+
+export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId, projId, id, dragOverlay }) => {
   const { user } = useContext(UserContext)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
@@ -50,7 +50,6 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
       setIsDeleteModalOpen(false)
     }
   }
-
   const {
     attributes,
     listeners,
@@ -60,20 +59,21 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
     isDragging,
   } = useSortable({ id });
   const style = {
-    transform: CSS.Translate.toString(transform),
+    transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const dragButtonStyle = { cursor: isDragging ? "grabbing" : "grab" }
+  const dragButtonStyle = { cursor: dragOverlay ? "grabbing" : "grab" }
 
   if (task) {
     const { displayName, description } = task
     return <div
-      {...attributes}
       ref={setNodeRef}
       className={styles.task}
       style={style}
+      {...listeners}
+      {...attributes}
     >
       {/* todo refactor modal dom position */}
       <Modal
@@ -96,15 +96,16 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
       >
         Вы уверены что хотите удалить задачу "{task.displayName}"?
       </Modal>
+      {APP_ICONS.dragHandler({
+        ...listeners,
+        ...attributes,
+        style: dragButtonStyle,
+        className: styles.dragHandler
+      })}
       <div className={styles.taskHeader}>
-        {APP_ICONS.dragHandler({
-          ...listeners,
-          ...attributes,
-          style: dragButtonStyle,
-          className: styles.dragHandler
-        })}
+
         <div className={styles.taskTitle} >{displayName}</div>
-        <Dropdown hover={false}>
+        {/* <Dropdown hover={false}>
           <Button text="Изменить" onClick={() => {
             setTaskData({
               ...task
@@ -112,7 +113,7 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
             setIsEditModalOpen(true)
           }} />
           <Button text="Удалить" onClick={() => setIsDeleteModalOpen(true)} />
-        </Dropdown>
+        </Dropdown> */}
       </div>
       {description && <div className={styles.taskDesc}>{description}</div>}
     </div>
@@ -128,7 +129,7 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
       >
         <TaskForm data={taskData} onChangeAction={setTaskData} />
       </Modal>}
-      <div className={styles.taskDesc} onClick={() => setIsModalOpen(true)}>&nbsp;+ Добавить задачу</div>
+      <div className={styles.taskTitle} onClick={() => setIsModalOpen(true)}>&nbsp;+ Добавить задачу</div>
     </div>
   }
 
