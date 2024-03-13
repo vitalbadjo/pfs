@@ -110,10 +110,10 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
           }} />
           <Button text="Удалить" onClick={() => setIsDeleteModalOpen(true)} />
         </Dropdown>
-        <p>{id}</p>
+        {/* <p>{id}</p> */}
         <p>{description}</p>
 
-        <p>{orderId}</p>
+        {/* <p>{orderId}</p> */}
       </Card>
       {/* {APP_ICONS.dragHandler({
         ...listeners,
