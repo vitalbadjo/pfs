@@ -28,8 +28,10 @@ const tasksService = (dbRef: Database, uid: string, projectId: string) => {
       const tasks = Object.values<Task>((await this.getAllFromCondition(conditionId)) || {})
       const orderId = tasks.length ? tasks.sort((a, b) => +a?.orderId! - +b?.orderId!)[tasks.length - 1].orderId! + 1 : 1
       const newItemRef = push(tasksOfConditionRef(conditionId), newData)
+      //@ts-ignore
+      newData = { ...newData, id: newItemRef.key, projectId, taskCondition: conditionId, orderId }
       try {
-        await set(newItemRef, { ...newData, id: newItemRef.key, projectId, taskCondition: conditionId, orderId })
+        await set(newItemRef, newData)
       } catch (error) {
         console.log("Task creation error: ", error)
       }
@@ -53,7 +55,7 @@ const tasksService = (dbRef: Database, uid: string, projectId: string) => {
       const transactionRef = ref(dbRef, `${realtimeDatabasePaths.tasksPathByProject(uid, projectId)}`)
       try {
         await update(transactionRef, tasksRaw)
-        console.log("Task batch updated")
+        console.log("Service: Task batch updated")
       } catch (error) {
         console.log("Task batch not updated")
       }

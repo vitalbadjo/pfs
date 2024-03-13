@@ -10,6 +10,8 @@ import { TaskItem } from "./task-item"
 import styles from "../projects-page.module.scss"
 import { TaskColumn } from "./tasks-col"
 import tasksService from "../../../services/tasks"
+import Modal from "../../../components/modals/modal"
+import { TaskEditForm } from "./task-edit-form copy"
 
 let unsubscribe: Unsubscribe = () => { }
 
@@ -23,6 +25,10 @@ export type TaskData = Omit<Task, "projectId" | "taskCondition" | "id">
 export const Tasks: FunctionComponent<ITasks> = (props) => {
   const { id, conditionsArray } = props
   const { user } = useContext(UserContext)
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [selectedTask, setSelectedTask] = useState<Task>()
 
   const [tasksRaw, setTasksRaw] = useState<TasksRaw>({})
   const [tasksGroups, setTasksGroups] = useState<TasksGroups>({});
@@ -49,13 +55,13 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
     return unsubscribe
   }, [user?.uid, id, conditionsArray])
 
-  useEffect(() => {
-    if (Object.keys(tasksGroups).length) {
-      const db = getDatabase()
-      tasksService(db, user?.uid!, id).updateBatch(groupsToRaw(tasksGroups))
-    }
+  // useEffect(() => {
+  //   if (Object.keys(tasksGroups).length) {
+  //     const db = getDatabase()
+  //     tasksService(db, user?.uid!, id).updateBatch(groupsToRaw(tasksGroups))
+  //   }
 
-  }, [tasksGroups])
+  // }, [tasksGroups])
 
   const sensors = useSensors(
     useSensor(MouseSensor),
@@ -98,6 +104,7 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
           activeTask!
         );
         const raw = groupsToRaw(newGroups)
+        setTasksRaw(raw)
         return rawToGroups(conditionsArray, raw)
       });
     } else {
@@ -119,15 +126,35 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
     }
   };
 
-  const handleDragEnd = async ({ active, over }: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over, delta, activatorEvent } = event
     if (!over) {
       setActiveTask(null);
       return;
     }
+    const activeContainer = active?.data?.current?.sortable.containerId;
+    const overContainer = over.data.current?.sortable.containerId || over.id;
+    const activeId = active?.id
+
+    if ((delta.x === delta.y && !delta.x)) {//!over || 
+      console.log("simulate click")
+      //@ts-ignore
+      const evId = activatorEvent.target?.id
+      if (evId) {
+        const [dropdownEvent, _] = evId.split(".")
+        if (dropdownEvent === "taskItemDropdown") {
+          setSelectedTask(tasksRaw[activeContainer][activeId])
+          setIsDeleteModalOpen(true)
+        }
+      } else {
+        setSelectedTask(tasksRaw[activeContainer][activeId])
+        setIsEditModalOpen(true)
+      }
+
+    }
+
     let newItems;
     if (active.id !== over.id) {
-      const activeContainer = active?.data?.current?.sortable.containerId;
-      const overContainer = over.data.current?.sortable.containerId || over.id;
       const activeIndex = active?.data?.current?.sortable.index;
       const overIndex =
         over.id in tasksGroups
@@ -159,6 +186,9 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
         }
 
         newItems = groupsToRaw(newItems)
+        const db = getDatabase()
+        tasksService(db, user?.uid!, id).updateBatch(newItems)
+        setTasksRaw(newItems)
         return rawToGroups(conditionsArray, newItems);
       });
     }
@@ -180,6 +210,21 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
     };
   };
 
+  const onEditTask = async () => {
+    if (user?.uid) {
+      await tasksService(getDatabase(), user?.uid, selectedTask?.projectId!)
+        .update(selectedTask?.taskCondition!, selectedTask?.id!, selectedTask!)
+      setSelectedTask(undefined)
+      setIsEditModalOpen(false)
+    }
+  }
+  const onDeleteTask = async () => {
+    if (user?.uid) {
+      await tasksService(getDatabase(), user?.uid, selectedTask?.projectId!)
+        .delete(selectedTask?.id!, selectedTask?.taskCondition!)
+      setIsDeleteModalOpen(false)
+    }
+  }
   return (
     <DndContext
       sensors={sensors}
@@ -188,10 +233,30 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className={styles.projectTasks} style={{ gridTemplateColumns: `repeat(${Object.keys(tasksGroups)?.length! + 1}, 200px)` }}>
-        {Object.keys(tasksGroups).map((group) => (
+      <Modal
+        title="Изменить задачу"
+        isOpen={isEditModalOpen}
+        setIsOpen={setIsEditModalOpen}
+        closeButtonText="Отменить"
+        actionFunc={onEditTask}
+        actionText="Подтвердить"
+      >
+        <TaskEditForm data={selectedTask} onChangeAction={setSelectedTask} />
+      </Modal>
+      <Modal
+        title="Удалить задачу"
+        isOpen={isDeleteModalOpen}
+        setIsOpen={setIsDeleteModalOpen}
+        closeButtonText="Отменить"
+        actionFunc={onDeleteTask}
+        actionText="Удалить"
+      >
+        Вы уверены что хотите удалить задачу "{selectedTask?.displayName}"?
+      </Modal>
+      <div className={styles.projectTasks} style={{ gridTemplateColumns: `repeat(${conditionsArray.length! + 1}, 200px)` }}>
+        {conditionsArray.map((group) => (
           // <Droppable id={group} items={tasksGroups[group]} key={group} />
-          <TaskColumn conditionId={group} tasks={tasksGroups[group]} key={group} projectId={id} />
+          <TaskColumn conditionId={group.id} tasks={tasksGroups[group.id] || []} key={group.id} projectId={id} />
         ))}
       </div>
       <DragOverlay >

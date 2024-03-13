@@ -11,9 +11,8 @@ type IConditionColumnProps = {
 }
 
 export const TaskColumn: React.FunctionComponent<IConditionColumnProps> = (props) => {
-  const { conditionId, tasks } = props
+  const { conditionId, tasks, projectId } = props
   const { setNodeRef } = useDroppable({ id: conditionId });
-  // console.log(tasks)
 
   return <SortableContext
     id={conditionId}
@@ -33,7 +32,7 @@ export const TaskColumn: React.FunctionComponent<IConditionColumnProps> = (props
           task={task}
         />
       })}
-      {/* <TaskItem id={`${conditionId}addtask`} condId={conditionId} projId={projectId} /> */}
+      <TaskItem id={`${conditionId}addtask`} condId={conditionId} projId={projectId} />
     </div>
   </SortableContext>
 }

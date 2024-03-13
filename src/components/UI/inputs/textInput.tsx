@@ -1,5 +1,6 @@
 import { ChangeEvent, FunctionComponent, useState } from "react";
 import styles from "./text-input.module.scss"
+import TextArea from "antd/es/input/TextArea";
 
 type ITextInput = {
   value: string
@@ -17,7 +18,7 @@ export const TextInput: FunctionComponent<ITextInput> = (props) => {
   const [error, setError] = useState("")
   const [isValid, setIsValid] = useState(true)
 
-  const onChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
+  const onChangeHandler = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const value = event.currentTarget.value
     const validation = validationFunc ? validationFunc(value) : { isValid, message: error }
     setIsValid(validation.isValid)
@@ -28,14 +29,25 @@ export const TextInput: FunctionComponent<ITextInput> = (props) => {
 
   return <div className={styles.inputWrapper}>
     {title && <h4 className={styles.title}>{title}</h4>}
-    <input
-      style={style || {}}
-      value={value}
-      onChange={onChangeHandler}
-      placeholder={placeholder || ""}
-      type={type}
-      disabled={!!disabled}
-    />
+    {type === "text" ?
+      <TextArea
+        autoSize={{ minRows: 2, maxRows: 9 }}
+        style={style || {}}
+        value={value}
+        onChange={onChangeHandler}
+        placeholder={placeholder || ""}
+        disabled={!!disabled}
+      />
+      :
+      <input
+        style={style || {}}
+        value={value}
+        onChange={onChangeHandler}
+        placeholder={placeholder || ""}
+        type={type}
+        disabled={!!disabled}
+      />
+    }
     {error && <div className={styles.message}>{error}</div>}
   </div>
 }

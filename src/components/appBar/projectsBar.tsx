@@ -22,6 +22,7 @@ export default function ProjectsBar(props: PropsWithChildren) {
   // modals state
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isAddProjectModal, setAddProjectModal] = useState(false)
+  const [isEditProjectModal, setEditProjectModal] = useState(false)
   // fetched data state
   // const [projects, setProjects] = useState<Project[]>([])
   const [projectsRaw, setProjectsRaw] = useState<Record<string, Project>>({})
@@ -121,7 +122,6 @@ export default function ProjectsBar(props: PropsWithChildren) {
         }}
         actionText="Подтвердить"
         actionFunc={() => { addProject() }}
-
       >
         <AddProjectForm data={addProjectData} setData={setAddProjectData} />
       </Modal>

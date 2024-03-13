@@ -52,6 +52,11 @@ const projectsService = (dbRef: Database, uid: string) => {
         console.log("Project deleted")
         // todo show popup
       }).catch(console.log)
+      const transactionTasksRef = ref(dbRef, `${realtimeDatabasePaths.tasksPathByProject(uid, projectId)}`)
+      remove(transactionTasksRef).then(() => {
+        console.log("Project tasks deleted")
+        // todo show popup
+      }).catch(console.log)
     },
     update(projectId: string, newData: Partial<Project>) {
       //todo reorder when removing

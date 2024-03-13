@@ -4,10 +4,11 @@ import styles from "./dropdown.module.scss"
 
 type IDropdownProps = {
   hover: boolean
+  id?: string
 }
 
 export const Dropdown: FunctionComponent<PropsWithChildren & IDropdownProps> = (props) => {
-  const { children } = props
+  const { children, id } = props
   const [visible, setVisible] = useState(false)
   const backDropRef = useRef<any>(null)
 
@@ -30,6 +31,7 @@ export const Dropdown: FunctionComponent<PropsWithChildren & IDropdownProps> = (
 
   return <div
     ref={backDropRef}
+    id={id}
     className={styles.dropdownButton}
     onClick={(e) => {
       e.stopPropagation()

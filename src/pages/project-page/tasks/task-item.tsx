@@ -9,6 +9,9 @@ import tasksService from "../../../services/tasks";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { APP_ICONS } from "../../../config/media";
+import { Card } from "antd";
+import { Button } from "../../../components/UI/inputs/button";
+import { Dropdown } from "../../../components/UI/dropdown/dropdown";
 
 type ITaskItemProps = {
   task?: Task
@@ -28,6 +31,7 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [taskData, setTaskData] = useState<TaskData>(defaultTaskData)
   const onSaveTask = async () => {
+    console.log("ons create")
     if (user?.uid) {
       await tasksService(getDatabase(), user?.uid, projId!)
         .create(taskData, condId!)
@@ -67,7 +71,7 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
   const dragButtonStyle = { cursor: dragOverlay ? "grabbing" : "grab" }
 
   if (task) {
-    const { displayName, description } = task
+    const { displayName, description, orderId, id, taskCondition } = task
     return <div
       ref={setNodeRef}
       className={styles.task}
@@ -94,18 +98,10 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
         actionFunc={onDeleteTask}
         actionText="Удалить"
       >
-        Вы уверены что хотите удалить задачу "{task.displayName}"?
+        Вы уверены что хотите удалить задачу "{displayName}"?
       </Modal>
-      {APP_ICONS.dragHandler({
-        ...listeners,
-        ...attributes,
-        style: dragButtonStyle,
-        className: styles.dragHandler
-      })}
-      <div className={styles.taskHeader}>
-
-        <div className={styles.taskTitle} >{displayName}</div>
-        {/* <Dropdown hover={false}>
+      <Card title={displayName} size="small" style={{ maxHeight: "121px" }}>
+        <Dropdown hover={false} id={`taskItemDropdown.${id}`}>
           <Button text="Изменить" onClick={() => {
             setTaskData({
               ...task
@@ -113,9 +109,25 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
             setIsEditModalOpen(true)
           }} />
           <Button text="Удалить" onClick={() => setIsDeleteModalOpen(true)} />
-        </Dropdown> */}
+        </Dropdown>
+        <p>{id}</p>
+        <p>{description}</p>
+
+        <p>{orderId}</p>
+      </Card>
+      {/* {APP_ICONS.dragHandler({
+        ...listeners,
+        ...attributes,
+        style: dragButtonStyle,
+        className: styles.dragHandler
+      })}
+      <div className={styles.taskHeader}>
+        <div className={styles.taskTitle} >{displayName}</div>
       </div>
       {description && <div className={styles.taskDesc}>{description}</div>}
+      <div className={styles.taskDesc}>Condition {taskCondition}</div>
+      <div className={styles.taskDesc}>Id {id}</div>
+      <div className={styles.taskDesc}>OrderId {orderId}</div> */}
     </div>
   } else {
     return <div className={styles.task}>
