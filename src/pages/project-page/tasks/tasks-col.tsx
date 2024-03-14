@@ -16,7 +16,7 @@ export const TaskColumn: React.FunctionComponent<IConditionColumnProps> = (props
 
   return <SortableContext
     id={conditionId}
-    items={tasks}//{Object.values(tasks).map(v => `${condition.id}/${v.id}`)}
+    items={tasks}
     strategy={verticalListSortingStrategy}
   >
     <div

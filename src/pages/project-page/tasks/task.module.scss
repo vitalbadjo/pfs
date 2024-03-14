@@ -3,15 +3,10 @@
 
 .task {
   box-sizing: border-box;
-  // border: 1px solid black;
-  // border-radius: 3px;
-  // padding: 3px;
   cursor: pointer;
-  // background-color: vars.$white;
   position: relative;
   overflow: hidden;
 
-  // margin-bottom: 6px;
   .dragHandler {
     height: 18px;
     left: 4px;

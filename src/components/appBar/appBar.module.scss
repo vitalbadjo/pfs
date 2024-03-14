@@ -61,7 +61,7 @@
     }
 
     li:hover {
-      background-color: rgb(242, 242, 242);
+      // background-color: rgb(242, 242, 242);
 
       .dragHandler {
         visibility: visible;
@@ -69,8 +69,9 @@
     }
 
     li.selectedProject {
-      background-color: rgb(232, 232, 232);
+      // background-color: rgb(232, 232, 232);
       font-weight: 500;
+      color: white;
     }
   }
 }

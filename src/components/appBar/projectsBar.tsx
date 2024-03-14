@@ -14,6 +14,7 @@ import { DndProjects } from './dndProjects';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { reorderSimple } from '../../utils/utils';
+import { Menu } from "antd";
 
 export default function ProjectsBar(props: PropsWithChildren) {
   const navigate = useNavigate()
@@ -99,51 +100,56 @@ export default function ProjectsBar(props: PropsWithChildren) {
   );
 
   return (
-    <ul className={styles.appBarMenu}>
-      <Modal
-        title="Remove project"
-        isOpen={isModalOpen}
-        setIsOpen={setIsModalOpen}
-        closeButtonText="Cancel"
-        onCancel={() => { setProjectToDelete(null) }}
-        actionText="Подтвердить"
-        actionFunc={() => { removeProject() }}
-      >
-        <div>Вы уверены что хотите удалить проект "{projectToDelete?.displayName}"?</div>
-      </Modal>
-      <Modal
-        title="Добавить проект"
-        isOpen={isAddProjectModal}
-        setIsOpen={setAddProjectModal}
-        closeButtonText="Cancel"
-        onCancel={() => {
-          setAddProjectModal(false)
-          setAddProjectData({ displayName: "" })
-        }}
-        actionText="Подтвердить"
-        actionFunc={() => { addProject() }}
-      >
-        <AddProjectForm data={addProjectData} setData={setAddProjectData} />
-      </Modal>
-      <li>Projects</li>
-      <DndContext
-        onDragStart={dragStart}
-        onDragEnd={dragEnd}
-        collisionDetection={closestCenter}
-        sensors={sensors}
-        modifiers={[restrictToVerticalAxis]}
-      >
-        <DndProjects
-          activeProj={activeProj}
-          setAddProjectModal={setAddProjectModal}
-          setIsModalOpen={setIsModalOpen}
-          setProjectToDelete={setProjectToDelete}
-          editProject={editProject}
-          projects={Object.values(projectsRaw)}
-          onClickProject={onClickProject}
-        />
-      </DndContext>
-      <li onClick={() => getAuth().signOut()}>Logout</li>
-    </ul >
+    <Menu inlineIndent={10} mode="inline" theme="dark" style={{ height: "100vh" }}>
+      <Menu.SubMenu className={styles.appBarMenu} key="projects" title="Projects">
+        {/* <Modal
+          title="Remove project"
+          isOpen={isModalOpen}
+          setIsOpen={setIsModalOpen}
+          closeButtonText="Cancel"
+          onCancel={() => { setProjectToDelete(null) }}
+          actionText="Подтвердить"
+          actionFunc={() => { removeProject() }}
+        >
+          <div>Вы уверены что хотите удалить проект "{projectToDelete?.displayName}"?</div>
+        </Modal>
+        <Modal
+          title="Добавить проект"
+          isOpen={isAddProjectModal}
+          setIsOpen={setAddProjectModal}
+          closeButtonText="Cancel"
+          onCancel={() => {
+            setAddProjectModal(false)
+            setAddProjectData({ displayName: "" })
+          }}
+          actionText="Подтвердить"
+          actionFunc={() => { addProject() }}
+        >
+          <AddProjectForm data={addProjectData} setData={setAddProjectData} />
+        </Modal> */}
+        {Object.values(projectsRaw).map((proj) => {
+          return <Menu.Item key={proj.id} title={"asd"} onClick={() => onClickProject(proj.id)}>{proj.displayName}</Menu.Item>
+        })}
+        {/* <DndContext
+          onDragStart={dragStart}
+          onDragEnd={dragEnd}
+          collisionDetection={closestCenter}
+          sensors={sensors}
+          modifiers={[restrictToVerticalAxis]}
+        >
+          <DndProjects
+            activeProj={activeProj}
+            setAddProjectModal={setAddProjectModal}
+            setIsModalOpen={setIsModalOpen}
+            setProjectToDelete={setProjectToDelete}
+            editProject={editProject}
+            projects={Object.values(projectsRaw)}
+            onClickProject={onClickProject}
+          />
+        </DndContext> */}
+      </Menu.SubMenu >
+      <Menu.Divider style={{ height: "300px" }} />
+      <Menu.Item key="logout" onClick={() => getAuth().signOut()}>Logout</Menu.Item>
+    </Menu>
   );
 }

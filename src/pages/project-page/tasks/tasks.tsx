@@ -7,23 +7,23 @@ import { Unsubscribe, getDatabase, onValue, ref } from "firebase/database"
 import { realtimeDatabasePaths } from "../../../models/realtime-database-paths"
 import { arrayMove, groupsToRaw, insertAtIndex, rawToGroups, removeAtIndex } from "../../../utils/tasks.utils"
 import { TaskItem } from "./task-item"
-import styles from "../projects-page.module.scss"
 import { TaskColumn } from "./tasks-col"
 import tasksService from "../../../services/tasks"
 import Modal from "../../../components/modals/modal"
-import { TaskEditForm } from "./task-edit-form copy"
+import { TaskEditForm } from "./task-edit-form"
+import styles from "../projects-page.module.scss"
 
 let unsubscribe: Unsubscribe = () => { }
 
 type ITasks = {
-  id: string//Project Id
+  projectId: string
   conditionsArray: TaskCondition[]
 }
 
 export type TaskData = Omit<Task, "projectId" | "taskCondition" | "id">
 
 export const Tasks: FunctionComponent<ITasks> = (props) => {
-  const { id, conditionsArray } = props
+  const { projectId, conditionsArray } = props
   const { user } = useContext(UserContext)
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
@@ -35,10 +35,10 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
 
   useEffect(() => {
-    if (id) {
+    if (projectId) {
       unsubscribe()
       const db = getDatabase()
-      const txRef = ref(db, realtimeDatabasePaths.tasksPathByProject(user?.uid!, id))
+      const txRef = ref(db, realtimeDatabasePaths.tasksPathByProject(user?.uid!, projectId))
 
       unsubscribe = onValue(txRef, (snapshot) => {
         const data: TasksRaw = snapshot.val();
@@ -53,15 +53,7 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
       });
     }
     return unsubscribe
-  }, [user?.uid, id, conditionsArray])
-
-  // useEffect(() => {
-  //   if (Object.keys(tasksGroups).length) {
-  //     const db = getDatabase()
-  //     tasksService(db, user?.uid!, id).updateBatch(groupsToRaw(tasksGroups))
-  //   }
-
-  // }, [tasksGroups])
+  }, [user?.uid, projectId, conditionsArray])
 
   const sensors = useSensors(
     useSensor(MouseSensor),
@@ -107,22 +99,6 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
         setTasksRaw(raw)
         return rawToGroups(conditionsArray, raw)
       });
-    } else {
-      // const activeIndex = active?.data?.current?.sortable.index;
-      // const overIndex =
-      //   over.id in tasksGroups
-      //     ? tasksGroups[overContainer].length + 1
-      //     : over?.data?.current?.sortable.index;
-      // setTasksGroups((itemGroups) => {
-      //   return {
-      //     ...itemGroups,
-      //     [overContainer]: arrayMove(
-      //       itemGroups[overContainer],
-      //       activeIndex,
-      //       overIndex,
-      //     ),
-      //   };
-      // })
     }
   };
 
@@ -136,7 +112,7 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
     const overContainer = over.data.current?.sortable.containerId || over.id;
     const activeId = active?.id
 
-    if ((delta.x === delta.y && !delta.x)) {//!over || 
+    if ((delta.x === delta.y && !delta.x)) {
       console.log("simulate click")
       //@ts-ignore
       const evId = activatorEvent.target?.id
@@ -187,7 +163,7 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
 
         newItems = groupsToRaw(newItems)
         const db = getDatabase()
-        tasksService(db, user?.uid!, id).updateBatch(newItems)
+        tasksService(db, user?.uid!, projectId).updateBatch(newItems)
         setTasksRaw(newItems)
         return rawToGroups(conditionsArray, newItems);
       });
@@ -255,8 +231,7 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
       </Modal>
       <div className={styles.projectTasks} style={{ gridTemplateColumns: `repeat(${conditionsArray.length! + 1}, 200px)` }}>
         {conditionsArray.map((group) => (
-          // <Droppable id={group} items={tasksGroups[group]} key={group} />
-          <TaskColumn conditionId={group.id} tasks={tasksGroups[group.id] || []} key={group.id} projectId={id} />
+          <TaskColumn conditionId={group.id} tasks={tasksGroups[group.id] || []} key={group.id} projectId={projectId} />
         ))}
       </div>
       <DragOverlay >

@@ -11,7 +11,7 @@ import { realtimeDatabasePaths } from "../../../models/realtime-database-paths"
 import { reorderBetweenLists, reorderSimple } from "../../../utils/utils"
 import tasksService from "../../../services/tasks"
 import Modal from "../../../components/modals/modal"
-import { TaskEditForm } from "./task-edit-form copy"
+import { TaskEditForm } from "./task-edit-form"
 
 let unsubscribe: Unsubscribe = () => { }
 

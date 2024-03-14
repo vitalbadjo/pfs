@@ -15,8 +15,6 @@ type ConditionsRaw = Record<string, TaskCondition>
 export const ProjectsPage: React.FunctionComponent = () => {
   const { user } = useContext(UserContext)
   const { id } = useParams();
-  // const [conditions, setConditions] = useState<TaskCondition[]>()
-  // state for dnd
   const [conditionsRaw, setConditionsRaw] = useState<ConditionsRaw>({})
 
   useEffect(() => {
@@ -55,7 +53,7 @@ export const ProjectsPage: React.FunctionComponent = () => {
       setConditionsRaw={setConditionsRaw}
     />
     <Tasks
-      id={id}
+      projectId={id}
       conditionsArray={conditionsArray}
     />
   </div>

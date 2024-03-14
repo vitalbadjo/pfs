@@ -8,6 +8,7 @@ import { useParams } from "react-router-dom";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { APP_ICONS } from "../../config/media";
 import { Button } from "../UI/inputs/button";
+import { Menu } from "antd";
 
 type IDndProjectsProps = {
   projects: Project[]
@@ -29,8 +30,8 @@ export const DndProjects: FunctionComponent<PropsWithChildren & IDndProjectsProp
     setProjectToDelete,
     activeProj
   } = props
-
-  return <ul className={styles.appBarSubMenu} >
+  //<ul className={styles.appBarSubMenu} >
+  return <>
     <SortableContext items={projects.sort((a, b) => +a.orderId - +b.orderId)} strategy={verticalListSortingStrategy}>
       {projects.sort((a, b) => +a.orderId - +b.orderId).map(proj => {
         return <DndProjectsItem
@@ -54,9 +55,10 @@ export const DndProjects: FunctionComponent<PropsWithChildren & IDndProjectsProp
         /> : null
       }
       </DragOverlay>
-      <li onClick={() => setAddProjectModal(true)}>Add project <span>+&nbsp;&nbsp;</span></li>
+      <Menu.Divider />
+      <Menu.Item onClick={() => setAddProjectModal(true)}>Add project <span>+&nbsp;&nbsp;</span></Menu.Item>
     </SortableContext>
-  </ul>
+  </>
 
 }
 
@@ -81,7 +83,8 @@ const DndProjectsItem: FunctionComponent<IDndProjectsItemProps> = (props) => {
 
   };
   const dragButtonStyle = { cursor: isDragging ? "grabbing" : "grab" }
-  return <li
+  return <Menu.Item
+    //@ts-ignore
     ref={setNodeRef}
     style={style}
     className={id === proj.id ? styles.selectedProject : ""}
@@ -103,5 +106,5 @@ const DndProjectsItem: FunctionComponent<IDndProjectsItemProps> = (props) => {
         setProjectToDelete(proj)
       }} text="Delete" />
     </Dropdown>
-  </li>
+  </Menu.Item>
 }

@@ -1,7 +1,6 @@
 import { Task } from "../../../models/projects-model";
 import { useContext, useState } from "react";
 import styles from "./task.module.scss"
-import { TaskForm } from "./task-add-form";
 import Modal from "../../../components/modals/modal";
 import { UserContext } from "../../../providers/userContext";
 import { getDatabase } from "firebase/database";
@@ -12,6 +11,7 @@ import { APP_ICONS } from "../../../config/media";
 import { Card } from "antd";
 import { Button } from "../../../components/UI/inputs/button";
 import { Dropdown } from "../../../components/UI/dropdown/dropdown";
+import { TaskForm } from "./task-add-form";
 
 type ITaskItemProps = {
   task?: Task
@@ -110,10 +110,7 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
           }} />
           <Button text="Удалить" onClick={() => setIsDeleteModalOpen(true)} />
         </Dropdown>
-        {/* <p>{id}</p> */}
         <p>{description}</p>
-
-        {/* <p>{orderId}</p> */}
       </Card>
       {/* {APP_ICONS.dragHandler({
         ...listeners,
@@ -126,8 +123,7 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
       </div>
       {description && <div className={styles.taskDesc}>{description}</div>}
       <div className={styles.taskDesc}>Condition {taskCondition}</div>
-      <div className={styles.taskDesc}>Id {id}</div>
-      <div className={styles.taskDesc}>OrderId {orderId}</div> */}
+       */}
     </div>
   } else {
     return <div className={styles.task}>
@@ -144,8 +140,6 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
       <div className={styles.taskTitle} onClick={() => setIsModalOpen(true)}>&nbsp;+ Добавить задачу</div>
     </div>
   }
-
-
 }
 
 
