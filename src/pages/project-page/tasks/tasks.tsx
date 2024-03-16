@@ -9,9 +9,9 @@ import { arrayMove, groupsToRaw, insertAtIndex, rawToGroups, removeAtIndex } fro
 import { TaskItem } from "./task-item"
 import { TaskColumn } from "./tasks-col"
 import tasksService from "../../../services/tasks"
-import Modal from "../../../components/modals/modal"
 import { TaskEditForm } from "./task-edit-form"
 import styles from "../projects-page.module.scss"
+import { ConfirmModal } from "../../../components/modals/confirmModal"
 
 let unsubscribe: Unsubscribe = () => { }
 
@@ -209,7 +209,7 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <Modal
+      {/* <Modal
         title="Изменить задачу"
         isOpen={isEditModalOpen}
         setIsOpen={setIsEditModalOpen}
@@ -218,24 +218,21 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
         actionText="Подтвердить"
       >
         <TaskEditForm data={selectedTask} onChangeAction={setSelectedTask} />
-      </Modal>
-      <Modal
+      </Modal> */}
+      <ConfirmModal
         title="Удалить задачу"
-        isOpen={isDeleteModalOpen}
-        setIsOpen={setIsDeleteModalOpen}
-        closeButtonText="Отменить"
-        actionFunc={onDeleteTask}
-        actionText="Удалить"
-      >
-        Вы уверены что хотите удалить задачу "{selectedTask?.displayName}"?
-      </Modal>
+        message={`Вы уверены что хотите удалить задачу "${selectedTask?.displayName}"?`}
+        open={isDeleteModalOpen}
+        confirm={onDeleteTask}
+        cancel={() => setIsDeleteModalOpen(false)}
+      />
       <div className={styles.projectTasks} style={{ gridTemplateColumns: `repeat(${conditionsArray.length! + 1}, 200px)` }}>
         {conditionsArray.map((group) => (
-          <TaskColumn conditionId={group.id} tasks={tasksGroups[group.id] || []} key={group.id} projectId={projectId} />
+          <TaskColumn conditionId={group.id} tasks={tasksGroups[group.id] || []} key={group.id} projectId={projectId} onDeleteTask={() => setIsDeleteModalOpen(true)} />
         ))}
       </div>
       <DragOverlay >
-        {activeTask ? <TaskItem id={activeTask.id} task={activeTask} dragOverlay /> : null}
+        {activeTask ? <TaskItem id={activeTask.id} task={activeTask} dragOverlay onDeleteTask={onDeleteTask} /> : null}
       </DragOverlay>
     </DndContext>
   )

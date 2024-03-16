@@ -1,7 +1,7 @@
 import { Database, get, ref, remove, update, push, set } from "firebase/database"
 import { realtimeDatabasePaths } from "../models/realtime-database-paths"
 import { checkSnapshotExist } from "./utils"
-import { Project } from "../models/projects-model"
+import { Project, TaskCondition } from "../models/projects-model"
 import { reorderSimple } from "../utils/utils"
 
 const projectsService = (dbRef: Database, uid: string) => {
@@ -10,11 +10,13 @@ const projectsService = (dbRef: Database, uid: string) => {
     dbRef,
     path
   )
+  const foldersPath = realtimeDatabasePaths.projectsFoldersPath(uid)
+  const foldersRef = ref(dbRef, foldersPath)
 
   return {
     async getAll() {
       const snapshot = await get(projectsRef)
-      return checkSnapshotExist(snapshot)
+      return checkSnapshotExist<Record<string, Project>>(snapshot)
     },
     // subscribe(callback: (data: Record<string, Project>) => void) {
     //   onValue(projectsRef, (snapshot) => {
@@ -74,7 +76,7 @@ const projectsService = (dbRef: Database, uid: string) => {
       return {
         async getAll() {
           const snapshot = await get(conditionsRef)
-          return checkSnapshotExist(snapshot)
+          return checkSnapshotExist<Record<string, TaskCondition>>(snapshot)
         },
         async create(newData: Omit<Project, "id" | "orderId">) {
           const conditions = Object.values<Project>((await this.getAll()) || {})
@@ -105,7 +107,42 @@ const projectsService = (dbRef: Database, uid: string) => {
           }).catch(console.log)
         },
       }
-    }
+    },
+    // folders: {
+    //   get: async (): Promise<RTDBProjectsFolders> => {
+    //     const snapshot = await get(foldersRef)
+    //     return checkSnapshotExist<RTDBProjectsFolders>(snapshot)
+    //   },
+    //   add: async (displayName: string, path: string) => {
+    //     const newRef = ref(dbRef, `${foldersPath}/${path ? `${path}/children/` : ""}`)
+    //     const newData = { displayName, orderId: 0 }
+    //     const newItemRef = push(newRef, newData)
+    //     try {
+    //       await set(newItemRef, { ...newData, id: newItemRef.key })//TODO handle order correct ID
+    //       console.log(`%c PROJECT SERVICE_add: New Project folder with name: "${displayName}" created`, "color: green;")
+    //     } catch (error) {
+    //       console.log(`%c PROJECT SERVICE_add: Creation new Project folder with name: "${displayName}" Error`, "color: red;")
+    //       console.log("PROJECT SERVICE_add: ErroText: ", error)
+    //     }
+    //   },
+    //   update: async (id: string, displayName: string, path: string) => {
+    //     const folderRef = ref(dbRef, `${foldersPath}/${id}`)
+    //     update(folderRef, { displayName, path }).then(() => {
+    //       console.log("Folder updated")
+    //     }).catch(console.log)
+    //   },
+    //   delete: async (path: string, id: string) => {
+    //     const folderRef = ref(dbRef, `${foldersPath}/${path}/${id}`)
+    //     try {
+    //       await remove(folderRef)
+    //       console.log(`%c PROJECT SERVICE_delete: Folder with id: "${id}" removed`, "color: green;")
+    //     } catch (error) {
+    //       console.log(`%c PROJECT SERVICE_delete: Removing new Project folder with id: "${id}" Error`, "color: red;")
+    //       console.log("PROJECT SERVICE_delete: ErroText: ", error)
+    //     }
+    //   }
+
+    // }
   }
 }
 

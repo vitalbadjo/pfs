@@ -19,8 +19,11 @@ export type TaskCondition = {
 }
 
 export type Project = KanbanBaseFields & {
+  parentProjectId?: string
   conditions?: TaskCondition//Record<TaskCondition['id'], TaskCondition>
 }
+
+export type RTDBProjects = Record<string, Project>
 
 export type Task = KanbanBaseFields & {
   projectId: Project["id"]
@@ -31,3 +34,12 @@ export type ConditionId = string
 export type TaskId = string
 export type TasksRaw = Record<ConditionId, Record<TaskId, Task>>
 export type TasksGroups = Record<ConditionId, Task[]>
+
+// export type FolderDomain = {
+//   displayName: string
+//   id: string
+//   orderId: number
+//   path: string
+// }
+
+// export type RTDBProjectsFolders = Record<string, FolderDomain & { children?: RTDBProjectsFolders }>

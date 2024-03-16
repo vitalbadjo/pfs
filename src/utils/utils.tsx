@@ -8,8 +8,8 @@ export type ReorderType = {
   orderId: number
   id: string
   displayName: string
-  projectId: string
-  taskCondition: string
+  projectId?: string
+  taskCondition?: string
 } & Record<string, any>
 
 

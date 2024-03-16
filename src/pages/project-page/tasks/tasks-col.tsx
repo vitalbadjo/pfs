@@ -8,10 +8,11 @@ type IConditionColumnProps = {
   conditionId: string
   projectId: string
   tasks: Task[]
+  onDeleteTask: Function
 }
 
 export const TaskColumn: React.FunctionComponent<IConditionColumnProps> = (props) => {
-  const { conditionId, tasks, projectId } = props
+  const { conditionId, tasks, projectId, onDeleteTask } = props
   const { setNodeRef } = useDroppable({ id: conditionId });
 
   return <SortableContext
@@ -30,9 +31,10 @@ export const TaskColumn: React.FunctionComponent<IConditionColumnProps> = (props
           key={task.id}
           condId={task.taskCondition}
           task={task}
+          onDeleteTask={onDeleteTask}
         />
       })}
-      <TaskItem id={`${conditionId}addtask`} condId={conditionId} projId={projectId} />
+      <TaskItem id={`${conditionId}addtask`} condId={conditionId} projId={projectId} onDeleteTask={onDeleteTask} />
     </div>
   </SortableContext>
 }

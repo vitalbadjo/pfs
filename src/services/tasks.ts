@@ -1,9 +1,8 @@
 import { Database, get, ref, remove, update, push, set } from "firebase/database"
 import { realtimeDatabasePaths } from "../models/realtime-database-paths"
 import { checkSnapshotExist } from "./utils"
-import { Task } from "../models/projects-model"
+import { Task, TasksRaw } from "../models/projects-model"
 import { reorderBetweenLists } from "../utils/utils"
-import { TasksRaw } from "../pages/project-page/tasks/tasks_bak"
 
 const tasksService = (dbRef: Database, uid: string, projectId: string) => {
   const tasksOfProjectRef = ref(
@@ -18,11 +17,11 @@ const tasksService = (dbRef: Database, uid: string, projectId: string) => {
     async getAllFromCondition(conditionId: string) {
 
       const snapshot = await get(tasksOfConditionRef(conditionId))
-      return checkSnapshotExist(snapshot)
+      return checkSnapshotExist<Record<string, Task>>(snapshot)
     },
     async getAllFromProject() {
       const snapshot = await get(tasksOfProjectRef)
-      return checkSnapshotExist(snapshot)
+      return checkSnapshotExist<Record<string, Record<string, Task>>>(snapshot)
     },
     async create(newData: Omit<Task, "id" | "projectId" | "taskCondition">, conditionId: string) {
       const tasks = Object.values<Task>((await this.getAllFromCondition(conditionId)) || {})

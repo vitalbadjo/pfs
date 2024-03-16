@@ -1,7 +1,6 @@
 import { Task } from "../../../models/projects-model";
 import { useContext, useState } from "react";
 import styles from "./task.module.scss"
-import Modal from "../../../components/modals/modal";
 import { UserContext } from "../../../providers/userContext";
 import { getDatabase } from "firebase/database";
 import tasksService from "../../../services/tasks";
@@ -12,6 +11,7 @@ import { Card } from "antd";
 import { Button } from "../../../components/UI/inputs/button";
 import { Dropdown } from "../../../components/UI/dropdown/dropdown";
 import { TaskForm } from "./task-add-form";
+import { ConfirmModal } from "../../../components/modals/confirmModal";
 
 type ITaskItemProps = {
   task?: Task
@@ -19,12 +19,13 @@ type ITaskItemProps = {
   projId?: string
   id: string
   dragOverlay?: boolean
+  onDeleteTask: Function
 }
 
 export type TaskData = Omit<Task, "projectId" | "taskCondition" | "id">
 const defaultTaskData: TaskData = { displayName: "", orderId: 0 }
 
-export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId, projId, id, dragOverlay }) => {
+export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId, projId, id, dragOverlay, onDeleteTask }) => {
   const { user } = useContext(UserContext)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
@@ -45,13 +46,6 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
         .update(condId!, task?.id!, taskData)
       setTaskData(defaultTaskData)
       setIsEditModalOpen(false)
-    }
-  }
-  const onDeleteTask = async () => {
-    if (user?.uid) {
-      await tasksService(getDatabase(), user?.uid, task?.projectId!)
-        .delete(task?.id!, condId!)
-      setIsDeleteModalOpen(false)
     }
   }
   const {
@@ -80,7 +74,7 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
       {...attributes}
     >
       {/* todo refactor modal dom position */}
-      <Modal
+      {/* <Modal
         title="Добавить задачу"
         isOpen={isEditModalOpen}
         setIsOpen={setIsEditModalOpen}
@@ -89,17 +83,7 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
         actionText="Подтвердить"
       >
         <TaskForm data={taskData} onChangeAction={setTaskData} />
-      </Modal>
-      <Modal
-        title="Удалить задачу"
-        isOpen={isDeleteModalOpen}
-        setIsOpen={setIsDeleteModalOpen}
-        closeButtonText="Отменить"
-        actionFunc={onDeleteTask}
-        actionText="Удалить"
-      >
-        Вы уверены что хотите удалить задачу "{displayName}"?
-      </Modal>
+      </Modal> */}
       <Card title={displayName} size="small" style={{ maxHeight: "121px" }}>
         <Dropdown hover={false} id={`taskItemDropdown.${id}`}>
           <Button text="Изменить" onClick={() => {
@@ -127,7 +111,7 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
     </div>
   } else {
     return <div className={styles.task}>
-      {(condId && projId) && <Modal
+      {/* {(condId && projId) && <Modal
         title="Добавить задачу"
         isOpen={isModalOpen}
         setIsOpen={setIsModalOpen}
@@ -136,7 +120,7 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
         actionText="Подтвердить"
       >
         <TaskForm data={taskData} onChangeAction={setTaskData} />
-      </Modal>}
+      </Modal>} */}
       <div className={styles.taskTitle} onClick={() => setIsModalOpen(true)}>&nbsp;+ Добавить задачу</div>
     </div>
   }
