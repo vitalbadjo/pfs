@@ -116,7 +116,7 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
       //@ts-ignore
       const evId = activatorEvent.target?.id
       if (evId) {
-        const [dropdownEvent, _] = evId.split(".")
+        const [dropdownEvent] = evId.split(".")
         if (dropdownEvent === "taskItemDropdown") {
           setSelectedTask(tasksRaw[activeContainer][activeId])
           setIsDeleteModalOpen(true)

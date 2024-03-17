@@ -3,7 +3,7 @@ import { RTDBProjects } from '../../models/projects-model';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { FunctionComponent, useContext, useMemo, useState } from 'react';
 import { ItemType } from 'antd/es/menu/hooks/useItems';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { CreateProjectFormValues, ProjectCreateFormModal } from '../modals/addProjectModal';
 import { getDatabase } from 'firebase/database';
 import projectsService from '../../services/projects';
@@ -58,8 +58,8 @@ export const ProjectsMenu: FunctionComponent<ProjectsMenuPropsType> = (props) =>
 	const { user } = useContext(UserContext)
 	const { projects, isProjectsLoading } = props
 	const navigate = useNavigate()
-	const { id: projectId } = useParams()
 	const [createProjectModalOpen, setCreateProjectModalOpen] = useState(false)
+	const [selectedMenuKeys, setSelectedMenuKeys] = useState<string[]>([])
 
 	const items: MenuProps['items'] = useMemo(() => {
 		return getMenuItems(projects || {})
@@ -73,8 +73,12 @@ export const ProjectsMenu: FunctionComponent<ProjectsMenuPropsType> = (props) =>
 			description: description || "",
 			...folderIdValue
 		}
-		await projectsService(getDatabase(), user?.uid!).create(data)
+		const key = await projectsService(getDatabase(), user?.uid!).create(data)
 		setCreateProjectModalOpen(false)
+		if (key) {
+			setSelectedMenuKeys([key])
+			navigate(`/projects/${key}`)
+		}
 	}
 
 	if (isProjectsLoading) {
@@ -89,7 +93,7 @@ export const ProjectsMenu: FunctionComponent<ProjectsMenuPropsType> = (props) =>
 		<Menu
 			inlineIndent={10}
 			multiple={true}
-			selectedKeys={projectId ? [`project.${projectId}`] : undefined}
+			selectedKeys={selectedMenuKeys}
 			mode="inline"
 			theme="dark"
 			style={{ height: "100vh" }}
@@ -97,11 +101,6 @@ export const ProjectsMenu: FunctionComponent<ProjectsMenuPropsType> = (props) =>
 				label: "Projects",
 				key: "projects",
 				children: [{
-					key: 'addFolder',
-					label: 'addFolder',
-					icon: <PlusOutlined />,
-					danger: true,
-				}, {
 					key: 'addProject',
 					label: 'addProject',
 					icon: <PlusOutlined />,
@@ -109,10 +108,20 @@ export const ProjectsMenu: FunctionComponent<ProjectsMenuPropsType> = (props) =>
 				}, ...items]
 			}]}
 			onSelect={({ key, keyPath }) => {
+				setSelectedMenuKeys([key])
 				if (key === "addProject") {
 					setCreateProjectModalOpen(true)
 				} else {
 					navigate(`/projects/${key}`)
+				}
+			}}
+			onOpenChange={(keys) => {
+				if (keys.length > 1) {
+					const lastKey = keys[keys.length - 1]
+					if (lastKey !== "projects") {
+						setSelectedMenuKeys([lastKey])
+						navigate(`/projects/${lastKey}`)
+					}
 				}
 			}}
 		/>
@@ -120,7 +129,10 @@ export const ProjectsMenu: FunctionComponent<ProjectsMenuPropsType> = (props) =>
 		<ProjectCreateFormModal
 			open={createProjectModalOpen}
 			onCreate={onCreateProject}
-			onCancel={() => setCreateProjectModalOpen(false)}
+			onCancel={() => {
+				setCreateProjectModalOpen(false)
+				setSelectedMenuKeys([])
+			}}
 			initialValues={{ displayName: "" }}
 			projects={projects}
 		/>

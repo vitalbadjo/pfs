@@ -21,6 +21,7 @@ const projectsService = (dbRef: Database, uid: string) => {
       const orderId = projects.length ? projects.sort((a, b) => +a?.orderId! - +b?.orderId!)[projects.length - 1].orderId! + 1 : 1
       const newItemRef = push(projectsRef, newData)
       await set(newItemRef, { ...newData, id: newItemRef.key, orderId, conditions: {} })
+      return newItemRef.key
     },
     async swap(activeProjectId: string, targetProjectId: string) {
       const projects = await this.getAll()

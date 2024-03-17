@@ -1,5 +1,5 @@
 
-export type KanbanBaseFields = {
+type KanbanBaseFields = {
   orderId: number
   displayName: string
   id: string
@@ -7,6 +7,9 @@ export type KanbanBaseFields = {
   //TODO
   color?: string
 }
+
+type ConditionId = string
+type TaskId = string
 
 export type TaskCondition = {
   orderId: number
@@ -27,7 +30,5 @@ export type Task = KanbanBaseFields & {
   taskCondition: TaskCondition["id"]
 }
 
-export type ConditionId = string
-export type TaskId = string
 export type TasksRaw = Record<ConditionId, Record<TaskId, Task>>
 export type TasksGroups = Record<ConditionId, Task[]>
