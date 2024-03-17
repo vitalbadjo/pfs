@@ -4,13 +4,11 @@ import { UserContext } from "../../../providers/userContext";
 import { getDatabase } from "firebase/database";
 import { CSS } from "@dnd-kit/utilities";
 import styles from "./condition.module.scss"
-import Modal from "../../../components/modals/modal";
-import { ConditionForm } from "./condition-form";
 import projectsService from "../../../services/projects";
-import { Dropdown } from "../../../components/UI/dropdown/dropdown";
-import { Button } from "../../../components/UI/inputs/button";
 import { useSortable } from "@dnd-kit/sortable";
 import { APP_ICONS } from "../../../config/media";
+import { ConfirmModal } from "../../../components/modals/confirmModal";
+import { Button, Dropdown } from "antd";
 
 type IConditionColumnProps = {
   condition: TaskCondition | null
@@ -71,7 +69,7 @@ export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (
 
   if (condition) {
     return <div ref={setNodeRef} style={style} className={styles.condition}>
-      <Modal
+      {/* <Modal
         title="Изменить стадию"
         isOpen={isEditModalOpen}
         setIsOpen={setIsEditModalOpen}
@@ -81,18 +79,14 @@ export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (
 
       >
         <ConditionForm data={conditionData} onChangeAction={setConditionData} />
-      </Modal>
-      <Modal
+      </Modal> */}
+      <ConfirmModal
         title="Удалить стадию"
-        isOpen={isDeleteModalOpen}
-        setIsOpen={setIsDeleteModalOpen}
-        closeButtonText="Cancel"
-        actionFunc={onDeleteCondition}
-        actionText="Удалить"
-
-      >
-        Вы уверены что хотите удалить стадию "{condition.displayName}"?
-      </Modal>
+        message={`Вы уверены что хотите удалить стадию "${condition.displayName}"?`}
+        open={isDeleteModalOpen}
+        confirm={onDeleteCondition}
+        cancel={() => setIsDeleteModalOpen(false)}
+      />
       <div className={styles.conditionHeader}>
         {APP_ICONS.dragHandler({
           ...listeners,
@@ -103,21 +97,32 @@ export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (
         <div className={styles.conditionTitle}>{condition.displayName}</div>
 
         <Dropdown
-          hover={false}
+          placement="bottom"
+          menu={{
+            items: [
+              {
+                key: "edit",
+                label: (<Button onClick={() => {
+                  setConditionData({
+                    ...condition
+                  })
+                  setIsEditModalOpen(true)
+                }}>Изменить</Button>)
+              },
+              {
+                key: "delete",
+                label: (<Button onClick={() => setIsDeleteModalOpen(true)}>Удалить</Button>)
+              }
+            ]
+          }}
         >
-          <Button text="Изменить" onClick={() => {
-            setConditionData({
-              ...condition
-            })
-            setIsEditModalOpen(true)
-          }} />
-          <Button text="Удалить" onClick={() => setIsDeleteModalOpen(true)} />
+          <Button>...</Button>
         </Dropdown>
       </div>
     </div>
   } else {
     return <div className={styles.condition}>
-      <Modal
+      {/* <Modal
         title="Добавить стадию"
         isOpen={isModalOpen}
         setIsOpen={setIsModalOpen}
@@ -127,7 +132,7 @@ export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (
 
       >
         <ConditionForm data={conditionData} onChangeAction={setConditionData} />
-      </Modal>
+      </Modal> */}
       <div
         className={styles.conditionHeader}
         style={{ cursor: "pointer" }}

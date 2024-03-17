@@ -1,9 +1,7 @@
 import { Database, get, ref, remove, update, push, set } from "firebase/database"
 import { realtimeDatabasePaths } from "../models/realtime-database-paths"
 import { checkSnapshotExist } from "./utils"
-import { Task } from "../models/projects-model"
-import { reorderBetweenLists } from "../utils/utils"
-import { TasksRaw } from "../pages/project-page/tasks/tasks_bak"
+import { Task, TasksRaw } from "../models/projects-model"
 
 const tasksService = (dbRef: Database, uid: string, projectId: string) => {
   const tasksOfProjectRef = ref(
@@ -18,42 +16,29 @@ const tasksService = (dbRef: Database, uid: string, projectId: string) => {
     async getAllFromCondition(conditionId: string) {
 
       const snapshot = await get(tasksOfConditionRef(conditionId))
-      return checkSnapshotExist(snapshot)
+      return checkSnapshotExist<Record<string, Task>>(snapshot)
     },
     async getAllFromProject() {
       const snapshot = await get(tasksOfProjectRef)
-      return checkSnapshotExist(snapshot)
+      return checkSnapshotExist<Record<string, Record<string, Task>>>(snapshot)
     },
     async create(newData: Omit<Task, "id" | "projectId" | "taskCondition">, conditionId: string) {
       const tasks = Object.values<Task>((await this.getAllFromCondition(conditionId)) || {})
       const orderId = tasks.length ? tasks.sort((a, b) => +a?.orderId! - +b?.orderId!)[tasks.length - 1].orderId! + 1 : 1
       const newItemRef = push(tasksOfConditionRef(conditionId), newData)
+      const requestData = { ...newData, id: newItemRef.key, projectId, taskCondition: conditionId, orderId }
       try {
-        await set(newItemRef, { ...newData, id: newItemRef.key, projectId, taskCondition: conditionId, orderId })
+        await set(newItemRef, requestData)
       } catch (error) {
         console.log("Task creation error: ", error)
       }
 
     },
-    async swap(
-      activeTaskId: string,
-      targetTaskId: string,
-      activeConditionID: string,
-      targetConditionId: string
-    ) {
-      const projectTasks = await this.getAllFromProject()
-      const newData = reorderBetweenLists(
-        `${activeConditionID}/${activeTaskId}`,
-        `${targetConditionId}/${targetTaskId}`,
-        projectTasks
-      )
-      await update(tasksOfProjectRef, newData)
-    },
     async updateBatch(tasksRaw: TasksRaw) {
       const transactionRef = ref(dbRef, `${realtimeDatabasePaths.tasksPathByProject(uid, projectId)}`)
       try {
         await update(transactionRef, tasksRaw)
-        console.log("Task batch updated")
+        console.log("Service: Task batch updated")
       } catch (error) {
         console.log("Task batch not updated")
       }

@@ -1,6 +1,3 @@
-import { APP_CONSTANTS } from "../config/constants"
-
-export type ProjectColors = keyof typeof APP_CONSTANTS.styles.colors.cardBackgrounds
 
 export type KanbanBaseFields = {
   orderId: number
@@ -8,7 +5,7 @@ export type KanbanBaseFields = {
   id: string
   description?: string
   //TODO
-  color?: ProjectColors
+  color?: string
 }
 
 export type TaskCondition = {
@@ -19,8 +16,11 @@ export type TaskCondition = {
 }
 
 export type Project = KanbanBaseFields & {
-  conditions?: TaskCondition//Record<TaskCondition['id'], TaskCondition>
+  parentProjectId?: string
+  conditions?: TaskCondition
 }
+
+export type RTDBProjects = Record<string, Project>
 
 export type Task = KanbanBaseFields & {
   projectId: Project["id"]
