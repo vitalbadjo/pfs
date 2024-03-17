@@ -6,9 +6,8 @@ import { initializeApp } from "firebase/app"
 import { config } from "./config/config"
 import AuthRoute from "./auth-route"
 import { ProjectsPage } from './pages/project-page/projects-page';
-import { Tasks } from './pages/project-page/tasks/tasks';
-import Dashboard from './pages/dashboard';
 import { ProjectsRootPage } from './pages/project-page/projectsRoot';
+import { NotFound } from './pages/not-found';
 
 initializeApp(config.firebase)
 
@@ -19,17 +18,17 @@ const App: React.FunctionComponent<IAppProps> = (props) => {
 		<Routes>
 			<Route path={"/"} element={
 				<AuthRoute>
-					<Dashboard />
-				</AuthRoute>
-			} />
-			<Route path={"/projects/:id"} element={
-				<AuthRoute>
-					<ProjectsPage />
+					<NotFound />
 				</AuthRoute>
 			} />
 			<Route path={"/projects"} element={
 				<AuthRoute>
 					<ProjectsRootPage />
+				</AuthRoute>
+			} />
+			<Route path={"/projects/:id"} element={
+				<AuthRoute>
+					<ProjectsPage />
 				</AuthRoute>
 			} />
 			{/* <Route path={"/settings/currencies"} element={

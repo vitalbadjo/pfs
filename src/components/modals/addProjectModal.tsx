@@ -38,6 +38,7 @@ const CollectionCreateForm: React.FC<ProjectCreateFormProps> = ({
   useEffect(() => {
     onFormInstanceReady(form);
   }, []);
+
   const options: Option[] = foldersToOptions(projects)
   return (
     <Form layout="vertical" form={form} name="form_in_modal" initialValues={initialValues}>
@@ -51,9 +52,8 @@ const CollectionCreateForm: React.FC<ProjectCreateFormProps> = ({
       <Form.Item name="description" label="Description">
         <Input type="textarea" />
       </Form.Item>
-      <Form.Item name="folderId" label="Folder">
+      <Form.Item name="parentProjectId" label="Parent project">
         <Cascader options={options} changeOnSelect />
-        {/* onChange={onChange} changeOnSelect />; */}
       </Form.Item>
     </Form>
   );

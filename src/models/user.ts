@@ -1,4 +1,3 @@
-import { UserSettings } from "./user-settings"
 import { User } from "firebase/auth"
 
 export type UserModel = {
@@ -9,7 +8,6 @@ export type UserModel = {
 	displayName: string
 	phone: string
 	avatar: string // base64 or uploaded
-	settings: UserSettings
 }
 
 export type ObscuredFBUser = Pick<User, "photoURL" | "phoneNumber" | "email" | "emailVerified" | "displayName" | "uid">

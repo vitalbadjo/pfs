@@ -10,24 +10,12 @@ const projectsService = (dbRef: Database, uid: string) => {
     dbRef,
     path
   )
-  const foldersPath = realtimeDatabasePaths.projectsFoldersPath(uid)
-  const foldersRef = ref(dbRef, foldersPath)
 
   return {
     async getAll() {
       const snapshot = await get(projectsRef)
       return checkSnapshotExist<Record<string, Project>>(snapshot)
     },
-    // subscribe(callback: (data: Record<string, Project>) => void) {
-    //   onValue(projectsRef, (snapshot) => {
-    //     const data: Record<string, Project>  = snapshot.val();
-    //     if (!!data) {
-    //       callback(Object.values(data))
-    //     } else {
-    //       console.log('Project service: Data not found');
-    //     }
-    //   }),
-    // },
     async create(newData: Omit<Project, "id" | "orderId">) {
       const projects = Object.values<Project>((await this.getAll()) || {})
       const orderId = projects.length ? projects.sort((a, b) => +a?.orderId! - +b?.orderId!)[projects.length - 1].orderId! + 1 : 1
@@ -38,15 +26,6 @@ const projectsService = (dbRef: Database, uid: string) => {
       const projects = await this.getAll()
       const newData = reorderSimple(activeProjectId, targetProjectId, projects)
       await update(projectsRef, newData)
-    },
-    async _create(newData: Omit<Project, "id">) {
-      const projects = await this.getAll()
-      console.log("Service: projects - ", projects)
-      const oid = projects.length
-      const newRef = ref(dbRef, `${path}/${oid}`)
-      const key = push(projectsRef, newData).key
-      // // const newItemRef = push(newRef, newData)
-      await set(newRef, { ...newData, id: key, conditions: {} })
     },
     async delete(projectId: string) {
       const transactionRef = ref(dbRef, `${realtimeDatabasePaths.projectsPath(uid)}/${projectId}`)
@@ -108,41 +87,6 @@ const projectsService = (dbRef: Database, uid: string) => {
         },
       }
     },
-    // folders: {
-    //   get: async (): Promise<RTDBProjectsFolders> => {
-    //     const snapshot = await get(foldersRef)
-    //     return checkSnapshotExist<RTDBProjectsFolders>(snapshot)
-    //   },
-    //   add: async (displayName: string, path: string) => {
-    //     const newRef = ref(dbRef, `${foldersPath}/${path ? `${path}/children/` : ""}`)
-    //     const newData = { displayName, orderId: 0 }
-    //     const newItemRef = push(newRef, newData)
-    //     try {
-    //       await set(newItemRef, { ...newData, id: newItemRef.key })//TODO handle order correct ID
-    //       console.log(`%c PROJECT SERVICE_add: New Project folder with name: "${displayName}" created`, "color: green;")
-    //     } catch (error) {
-    //       console.log(`%c PROJECT SERVICE_add: Creation new Project folder with name: "${displayName}" Error`, "color: red;")
-    //       console.log("PROJECT SERVICE_add: ErroText: ", error)
-    //     }
-    //   },
-    //   update: async (id: string, displayName: string, path: string) => {
-    //     const folderRef = ref(dbRef, `${foldersPath}/${id}`)
-    //     update(folderRef, { displayName, path }).then(() => {
-    //       console.log("Folder updated")
-    //     }).catch(console.log)
-    //   },
-    //   delete: async (path: string, id: string) => {
-    //     const folderRef = ref(dbRef, `${foldersPath}/${path}/${id}`)
-    //     try {
-    //       await remove(folderRef)
-    //       console.log(`%c PROJECT SERVICE_delete: Folder with id: "${id}" removed`, "color: green;")
-    //     } catch (error) {
-    //       console.log(`%c PROJECT SERVICE_delete: Removing new Project folder with id: "${id}" Error`, "color: red;")
-    //       console.log("PROJECT SERVICE_delete: ErroText: ", error)
-    //     }
-    //   }
-
-    // }
   }
 }
 

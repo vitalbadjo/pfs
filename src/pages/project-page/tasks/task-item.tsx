@@ -7,10 +7,7 @@ import tasksService from "../../../services/tasks";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { APP_ICONS } from "../../../config/media";
-import { Card } from "antd";
-import { Button } from "../../../components/UI/inputs/button";
-import { Dropdown } from "../../../components/UI/dropdown/dropdown";
-import { TaskForm } from "./task-add-form";
+import { Button, Card, Dropdown } from "antd";
 import { ConfirmModal } from "../../../components/modals/confirmModal";
 
 type ITaskItemProps = {
@@ -85,14 +82,25 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
         <TaskForm data={taskData} onChangeAction={setTaskData} />
       </Modal> */}
       <Card title={displayName} size="small" style={{ maxHeight: "121px" }}>
-        <Dropdown hover={false} id={`taskItemDropdown.${id}`}>
-          <Button text="Изменить" onClick={() => {
-            setTaskData({
-              ...task
-            })
-            setIsEditModalOpen(true)
-          }} />
-          <Button text="Удалить" onClick={() => setIsDeleteModalOpen(true)} />
+        <Dropdown placement="bottom" menu={{
+          items: [
+            {
+              key: `taskItemDropdown1.${id}`,
+              label: (<Button onClick={() => {
+                setTaskData({
+                  ...task
+                })
+                setIsEditModalOpen(true)
+              }}>Изменить</Button>),
+            },
+            {
+              key: `taskItemDropdown2.${id}`,
+              label: (<Button onClick={() => setIsDeleteModalOpen(true)}>Удалить</Button>),
+            },
+          ]
+        }}>
+          <Button>...</Button>
+
         </Dropdown>
         <p>{description}</p>
       </Card>

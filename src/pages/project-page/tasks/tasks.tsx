@@ -9,7 +9,6 @@ import { arrayMove, groupsToRaw, insertAtIndex, rawToGroups, removeAtIndex } fro
 import { TaskItem } from "./task-item"
 import { TaskColumn } from "./tasks-col"
 import tasksService from "../../../services/tasks"
-import { TaskEditForm } from "./task-edit-form"
 import styles from "../projects-page.module.scss"
 import { ConfirmModal } from "../../../components/modals/confirmModal"
 

@@ -1,10 +1,7 @@
-@use "../../../config/vars";
-@use "../../../config/mixins" as fonts;
-
 .condition {
   display: grid;
   grid-template-rows: min-content auto;
-  background-color: vars.$white;
+  background-color: white;
 }
 
 .conditionHeader {
@@ -16,7 +13,6 @@
   position: relative;
 
   .conditionTitle {
-    @include fonts.fsb;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
@@ -32,7 +28,7 @@
     visibility: hidden;
 
     circle {
-      fill: vars.$blackColor
+      fill: black
     }
   }
 

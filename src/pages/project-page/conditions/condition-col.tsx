@@ -4,13 +4,11 @@ import { UserContext } from "../../../providers/userContext";
 import { getDatabase } from "firebase/database";
 import { CSS } from "@dnd-kit/utilities";
 import styles from "./condition.module.scss"
-import { ConditionForm } from "./condition-form";
 import projectsService from "../../../services/projects";
-import { Dropdown } from "../../../components/UI/dropdown/dropdown";
-import { Button } from "../../../components/UI/inputs/button";
 import { useSortable } from "@dnd-kit/sortable";
 import { APP_ICONS } from "../../../config/media";
 import { ConfirmModal } from "../../../components/modals/confirmModal";
+import { Button, Dropdown } from "antd";
 
 type IConditionColumnProps = {
   condition: TaskCondition | null
@@ -99,15 +97,26 @@ export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (
         <div className={styles.conditionTitle}>{condition.displayName}</div>
 
         <Dropdown
-          hover={false}
+          placement="bottom"
+          menu={{
+            items: [
+              {
+                key: "edit",
+                label: (<Button onClick={() => {
+                  setConditionData({
+                    ...condition
+                  })
+                  setIsEditModalOpen(true)
+                }}>Изменить</Button>)
+              },
+              {
+                key: "delete",
+                label: (<Button onClick={() => setIsDeleteModalOpen(true)}>Удалить</Button>)
+              }
+            ]
+          }}
         >
-          <Button text="Изменить" onClick={() => {
-            setConditionData({
-              ...condition
-            })
-            setIsEditModalOpen(true)
-          }} />
-          <Button text="Удалить" onClick={() => setIsDeleteModalOpen(true)} />
+          <Button>...</Button>
         </Dropdown>
       </div>
     </div>

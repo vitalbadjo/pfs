@@ -2,7 +2,6 @@ import { Database, get, ref, remove, update, push, set } from "firebase/database
 import { realtimeDatabasePaths } from "../models/realtime-database-paths"
 import { checkSnapshotExist } from "./utils"
 import { Task, TasksRaw } from "../models/projects-model"
-import { reorderBetweenLists } from "../utils/utils"
 
 const tasksService = (dbRef: Database, uid: string, projectId: string) => {
   const tasksOfProjectRef = ref(
@@ -27,28 +26,13 @@ const tasksService = (dbRef: Database, uid: string, projectId: string) => {
       const tasks = Object.values<Task>((await this.getAllFromCondition(conditionId)) || {})
       const orderId = tasks.length ? tasks.sort((a, b) => +a?.orderId! - +b?.orderId!)[tasks.length - 1].orderId! + 1 : 1
       const newItemRef = push(tasksOfConditionRef(conditionId), newData)
-      //@ts-ignore
-      newData = { ...newData, id: newItemRef.key, projectId, taskCondition: conditionId, orderId }
+      const requestData = { ...newData, id: newItemRef.key, projectId, taskCondition: conditionId, orderId }
       try {
-        await set(newItemRef, newData)
+        await set(newItemRef, requestData)
       } catch (error) {
         console.log("Task creation error: ", error)
       }
 
-    },
-    async swap(
-      activeTaskId: string,
-      targetTaskId: string,
-      activeConditionID: string,
-      targetConditionId: string
-    ) {
-      const projectTasks = await this.getAllFromProject()
-      const newData = reorderBetweenLists(
-        `${activeConditionID}/${activeTaskId}`,
-        `${targetConditionId}/${targetTaskId}`,
-        projectTasks
-      )
-      await update(tasksOfProjectRef, newData)
     },
     async updateBatch(tasksRaw: TasksRaw) {
       const transactionRef = ref(dbRef, `${realtimeDatabasePaths.tasksPathByProject(uid, projectId)}`)

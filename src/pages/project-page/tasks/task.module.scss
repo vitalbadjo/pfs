@@ -1,6 +1,3 @@
-@use "../../../config/vars";
-@use "../../../config/mixins" as fonts;
-
 .task {
   box-sizing: border-box;
   cursor: pointer;
@@ -16,7 +13,7 @@
     visibility: hidden;
 
     circle {
-      fill: vars.$blackColor
+      fill: black
     }
   }
 
@@ -38,7 +35,6 @@
 }
 
 .taskTitle {
-  @include fonts.fsb;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -47,7 +43,6 @@
 }
 
 .taskDesc {
-  @include fonts.fs;
   padding: 0 4px 4px 4px;
   max-height: 69px;
   word-break: break-word;
