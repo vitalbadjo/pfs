@@ -31,7 +31,7 @@ function getItem(
 
 const getMenuItems = (projects: RTDBProjects, parentId?: string): ItemType[] => {
 	const projectsCopy = { ...projects }
-	return Object.values(projects).reduce<ItemType[]>((p, c) => {
+	return Object.values(projects).sort((a, b) => a.orderId - b.orderId).reduce<ItemType[]>((p, c) => {
 		if (!parentId) {
 			if (!c.parentProjectId) {
 				delete projectsCopy[c.id]
@@ -55,10 +55,13 @@ type ProjectsMenuPropsType = {
 }
 
 export const ProjectsMenu: FunctionComponent<ProjectsMenuPropsType> = (props) => {
-	const { user } = useContext(UserContext)
 	const { projects, isProjectsLoading } = props
+
+	const { user } = useContext(UserContext)
 	const navigate = useNavigate()
+
 	const [createProjectModalOpen, setCreateProjectModalOpen] = useState(false)
+
 	const [selectedMenuKeys, setSelectedMenuKeys] = useState<string[]>([])
 
 	const items: MenuProps['items'] = useMemo(() => {
@@ -125,7 +128,6 @@ export const ProjectsMenu: FunctionComponent<ProjectsMenuPropsType> = (props) =>
 				}
 			}}
 		/>
-
 		<ProjectCreateFormModal
 			open={createProjectModalOpen}
 			onCreate={onCreateProject}
@@ -137,7 +139,5 @@ export const ProjectsMenu: FunctionComponent<ProjectsMenuPropsType> = (props) =>
 			projects={projects}
 		/>
 	</>
-
-
 }
 

@@ -6,16 +6,16 @@ import { CSS } from "@dnd-kit/utilities";
 import styles from "./condition.module.scss"
 import projectsService from "../../../services/projects";
 import { useSortable } from "@dnd-kit/sortable";
-import { APP_ICONS } from "../../../config/media";
 import { ConfirmModal } from "../../../components/modals/confirmModal";
-import { Button, Dropdown } from "antd";
+import { Button, Col, Dropdown, Row, Typography, theme } from "antd";
+import { HolderOutlined, MoreOutlined, PlusOutlined } from "@ant-design/icons";
+import { ConditionCreateFormModal, CreateConditionFormValues } from "../../../components/modals/addConditionModal";
 
 type IConditionColumnProps = {
   condition: TaskCondition | null
   projectId: string
 }
 
-const defaultConditionData: TaskConditionData = { displayName: "" }
 
 export type TaskConditionData = Omit<TaskCondition, "id" | "projectId" | "orderId">
 
@@ -25,21 +25,21 @@ export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [conditionData, setConditionData] = useState<TaskConditionData>(defaultConditionData)
+  const { token } = theme.useToken()
 
-  const onSaveCondition = async () => {
+  const onSaveCondition = async (values: CreateConditionFormValues) => {
+    const { displayName } = values
     if (user?.uid) {
       await projectsService(getDatabase(), user?.uid).condition(projectId)
-        .create(conditionData)
-      setConditionData(defaultConditionData)
+        .create({ displayName })
       setIsModalOpen(false)
     }
   }
-  const onEditCondition = async () => {
+  const onEditCondition = async (values: CreateConditionFormValues) => {
+    const { displayName, id } = values
     if (user?.uid) {
       await projectsService(getDatabase(), user?.uid).condition(projectId)
-        .update(condition?.id!, conditionData)
-      setConditionData(defaultConditionData)
+        .update(id!, { displayName })
       setIsEditModalOpen(false)
     }
   }
@@ -65,21 +65,29 @@ export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (
     transition,
     opacity: isDragging ? 0.3 : 1
   };
-  const dragButtonStyle = { cursor: isDragging ? "grabbing" : "grab" }
-
+  const dragButtonStyle = isDragging ? {
+    cursor: "grabbing",
+    transform: "rotateZ(4deg)",
+    transformOrigin: "left",
+    zIndex: 10
+  } : { cursor: "grab" }
   if (condition) {
-    return <div ref={setNodeRef} style={style} className={styles.condition}>
-      {/* <Modal
-        title="Изменить стадию"
-        isOpen={isEditModalOpen}
-        setIsOpen={setIsEditModalOpen}
-        closeButtonText="Cancel"
-        actionFunc={onEditCondition}
-        actionText="Подтвердить"
-
-      >
-        <ConditionForm data={conditionData} onChangeAction={setConditionData} />
-      </Modal> */}
+    return <div
+      ref={setNodeRef}
+      style={{
+        ...dragButtonStyle,
+        ...style,
+        borderRadius: token.borderRadius,
+        border: `1px solid ${token.colorBorder}`,
+      }}
+      className={styles.condition}
+    >
+      <ConditionCreateFormModal
+        open={isEditModalOpen}
+        onCancel={() => setIsEditModalOpen(false)}
+        onCreate={onEditCondition}
+        initialValues={{ displayName: condition.displayName, id: condition.id }}
+      />
       <ConfirmModal
         title="Удалить стадию"
         message={`Вы уверены что хотите удалить стадию "${condition.displayName}"?`}
@@ -87,60 +95,58 @@ export const ConditionColumn: React.FunctionComponent<IConditionColumnProps> = (
         confirm={onDeleteCondition}
         cancel={() => setIsDeleteModalOpen(false)}
       />
-      <div className={styles.conditionHeader}>
-        {APP_ICONS.dragHandler({
-          ...listeners,
-          ...attributes,
-          style: dragButtonStyle,
-          className: styles.dragHandler
-        })}
-        <div className={styles.conditionTitle}>{condition.displayName}</div>
-
-        <Dropdown
-          placement="bottom"
-          menu={{
-            items: [
-              {
-                key: "edit",
-                label: (<Button onClick={() => {
-                  setConditionData({
-                    ...condition
-                  })
-                  setIsEditModalOpen(true)
-                }}>Изменить</Button>)
-              },
-              {
-                key: "delete",
-                label: (<Button onClick={() => setIsDeleteModalOpen(true)}>Удалить</Button>)
-              }
-            ]
-          }}
-        >
-          <Button>...</Button>
-        </Dropdown>
-      </div>
+      <Row justify="space-between" align="middle" wrap={false}>
+        <Col span={4}>
+          <Button
+            type="text"
+            icon={<HolderOutlined />}
+            {...listeners}
+            {...attributes}
+            style={dragButtonStyle}
+          />
+        </Col>
+        <Col span={16}>
+          <Typography.Text strong ellipsis>{condition.displayName}</Typography.Text>
+        </Col>
+        <Col span={4}>
+          <Dropdown
+            placement="bottomRight"
+            menu={{
+              items: [
+                {
+                  key: "edit",
+                  label: (<Button
+                    onClick={() => {
+                      setIsEditModalOpen(true)
+                    }}
+                    type="primary"
+                    block
+                  >Изменить</Button>)
+                },
+                {
+                  key: "delete",
+                  label: (<Button onClick={() => {
+                    setIsDeleteModalOpen(true)
+                  }} danger block>Удалить</Button>)
+                }
+              ]
+            }}
+          >
+            <Button icon={<MoreOutlined />} type="text" />
+          </Dropdown>
+        </Col>
+      </Row>
     </div>
   } else {
-    return <div className={styles.condition}>
-      {/* <Modal
-        title="Добавить стадию"
-        isOpen={isModalOpen}
-        setIsOpen={setIsModalOpen}
-        closeButtonText="Cancel"
-        actionFunc={onSaveCondition}
-        actionText="Подтвердить"
-
-      >
-        <ConditionForm data={conditionData} onChangeAction={setConditionData} />
-      </Modal> */}
-      <div
-        className={styles.conditionHeader}
-        style={{ cursor: "pointer" }}
-        onClick={() => setIsModalOpen(true)}
-      >
-        <div className={styles.conditionTitle}>Добавить стадию</div>
-      </div>
-    </div>
+    return <>
+      <ConditionCreateFormModal
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        onCreate={onSaveCondition}
+        initialValues={{ displayName: "" }}
+      />
+      <Button onClick={() => setIsModalOpen(true)} icon={<PlusOutlined />} block>Добавить стадию</Button>
+    </>
   }
 }
 

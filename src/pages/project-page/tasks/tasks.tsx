@@ -10,7 +10,7 @@ import { TaskItem } from "./task-item"
 import { TaskColumn } from "./tasks-col"
 import tasksService from "../../../services/tasks"
 import styles from "../projects-page.module.scss"
-import { ConfirmModal } from "../../../components/modals/confirmModal"
+import { CreateTaskFormValues, TaskCreateFormModal } from "../../../components/modals/addTaskModal"
 
 let unsubscribe: Unsubscribe = () => { }
 
@@ -25,14 +25,12 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
   const { projectId, conditionsArray } = props
   const { user } = useContext(UserContext)
 
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task>()
 
   const [tasksRaw, setTasksRaw] = useState<TasksRaw>({})
   const [tasksGroups, setTasksGroups] = useState<TasksGroups>({});
   const [activeTask, setActiveTask] = useState<Task | null>(null);
-
   useEffect(() => {
     if (projectId) {
       unsubscribe()
@@ -102,7 +100,7 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over, delta, activatorEvent } = event
+    const { active, over, delta } = event
     if (!over) {
       setActiveTask(null);
       return;
@@ -113,19 +111,8 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
 
     if ((delta.x === delta.y && !delta.x)) {
       console.log("simulate click")
-      //@ts-ignore
-      const evId = activatorEvent.target?.id
-      if (evId) {
-        const [dropdownEvent] = evId.split(".")
-        if (dropdownEvent === "taskItemDropdown") {
-          setSelectedTask(tasksRaw[activeContainer][activeId])
-          setIsDeleteModalOpen(true)
-        }
-      } else {
-        setSelectedTask(tasksRaw[activeContainer][activeId])
-        setIsEditModalOpen(true)
-      }
-
+      setSelectedTask(tasksRaw[activeContainer][activeId])
+      setIsEditModalOpen(true)
     }
 
     let newItems;
@@ -185,19 +172,20 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
     };
   };
 
-  const onEditTask = async () => {
+  const onEditTask = async (values: CreateTaskFormValues) => {
     if (user?.uid) {
+      const { displayName, description, id } = values
       await tasksService(getDatabase(), user?.uid, selectedTask?.projectId!)
-        .update(selectedTask?.taskCondition!, selectedTask?.id!, selectedTask!)
+        .update(selectedTask?.taskCondition!, id!, { ...selectedTask, displayName, description })
       setSelectedTask(undefined)
       setIsEditModalOpen(false)
     }
   }
-  const onDeleteTask = async () => {
+  const onDeleteTask = async (id: string) => {
     if (user?.uid) {
       await tasksService(getDatabase(), user?.uid, selectedTask?.projectId!)
-        .delete(selectedTask?.id!, selectedTask?.taskCondition!)
-      setIsDeleteModalOpen(false)
+        .delete(id, selectedTask?.taskCondition!)
+      setIsEditModalOpen(false)
     }
   }
   return (
@@ -208,30 +196,20 @@ export const Tasks: FunctionComponent<ITasks> = (props) => {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      {/* <Modal
-        title="Изменить задачу"
-        isOpen={isEditModalOpen}
-        setIsOpen={setIsEditModalOpen}
-        closeButtonText="Отменить"
-        actionFunc={onEditTask}
-        actionText="Подтвердить"
-      >
-        <TaskEditForm data={selectedTask} onChangeAction={setSelectedTask} />
-      </Modal> */}
-      <ConfirmModal
-        title="Удалить задачу"
-        message={`Вы уверены что хотите удалить задачу "${selectedTask?.displayName}"?`}
-        open={isDeleteModalOpen}
-        confirm={onDeleteTask}
-        cancel={() => setIsDeleteModalOpen(false)}
+      <TaskCreateFormModal
+        open={isEditModalOpen}
+        onCancel={() => setIsEditModalOpen(false)}
+        onDelete={onDeleteTask}
+        onCreate={onEditTask}
+        initialValues={{ displayName: selectedTask?.displayName || "", description: selectedTask?.description, id: selectedTask?.id }}
       />
       <div className={styles.projectTasks} style={{ gridTemplateColumns: `repeat(${conditionsArray.length! + 1}, 200px)` }}>
         {conditionsArray.map((group) => (
-          <TaskColumn conditionId={group.id} tasks={tasksGroups[group.id] || []} key={group.id} projectId={projectId} onDeleteTask={() => setIsDeleteModalOpen(true)} />
+          <TaskColumn conditionId={group.id} tasks={tasksGroups[group.id] || []} key={group.id} projectId={projectId} />
         ))}
       </div>
       <DragOverlay >
-        {activeTask ? <TaskItem id={activeTask.id} task={activeTask} dragOverlay onDeleteTask={onDeleteTask} /> : null}
+        {activeTask ? <TaskItem id={activeTask.id} task={activeTask} dragOverlay /> : null}
       </DragOverlay>
     </DndContext>
   )

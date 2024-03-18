@@ -40,13 +40,10 @@ const projectsService = (dbRef: Database, uid: string) => {
         // todo show popup
       }).catch(console.log)
     },
-    update(projectId: string, newData: Partial<Project>) {
+    async update(projectId: string, newData: Partial<Project>) {
       //todo reorder when removing
       const transactionRef = ref(dbRef, `${realtimeDatabasePaths.projectsPath(uid)}/${projectId}`)
-      update(transactionRef, newData).then(() => {
-        console.log("Project updated")
-        // todo show popup
-      }).catch(console.log)
+      await update(transactionRef, newData)
     },
     condition: (projectId: string) => {
       const conditionsRef = ref(

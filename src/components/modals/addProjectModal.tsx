@@ -6,6 +6,7 @@ export interface CreateProjectFormValues {
   displayName: string;
   description?: string;
   parentProjectId?: string;
+  id?: string
 }
 
 interface Option {
@@ -35,8 +36,10 @@ const CollectionCreateForm: React.FC<ProjectCreateFormProps> = ({
   projects
 }) => {
   const [form] = Form.useForm();
+  console.log("form", form.getFieldsValue())
   useEffect(() => {
     onFormInstanceReady(form);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const options: Option[] = foldersToOptions(projects)
@@ -54,6 +57,9 @@ const CollectionCreateForm: React.FC<ProjectCreateFormProps> = ({
       </Form.Item>
       <Form.Item name="parentProjectId" label="Parent project">
         <Cascader options={options} changeOnSelect />
+      </Form.Item>
+      <Form.Item name="id" hidden>
+        <Input />
       </Form.Item>
     </Form>
   );
@@ -79,7 +85,7 @@ export const ProjectCreateFormModal: React.FC<ProjectCreateFormModalProps> = ({
     <Modal
       open={open}
       title="Create a new project"
-      okText="Create"
+      okText="Save"
       cancelText="Cancel"
       okButtonProps={{ autoFocus: true }}
       onCancel={onCancel}
