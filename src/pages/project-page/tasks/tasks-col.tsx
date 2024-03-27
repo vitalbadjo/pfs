@@ -3,6 +3,7 @@ import { Task } from "../../../models/projects-model";
 import { TaskItem } from "./task-item";
 import styles from "./tasks-col.module.scss"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { memo } from "react";
 
 type IConditionColumnProps = {
   conditionId: string
@@ -10,7 +11,7 @@ type IConditionColumnProps = {
   tasks: Task[]
 }
 
-export const TaskColumn: React.FunctionComponent<IConditionColumnProps> = (props) => {
+export const TaskColumn: React.FunctionComponent<IConditionColumnProps> = memo((props) => {
   const { conditionId, tasks, projectId } = props
   const { setNodeRef } = useDroppable({ id: conditionId });
 
@@ -35,7 +36,7 @@ export const TaskColumn: React.FunctionComponent<IConditionColumnProps> = (props
       <TaskItem id={`${conditionId}addtask`} condId={conditionId} projId={projectId} />
     </div>
   </SortableContext>
-}
+})
 
 
 

@@ -1,5 +1,5 @@
 import { Task } from "../../../models/projects-model";
-import { useContext, useState } from "react";
+import { memo, useContext, useState } from "react";
 import { UserContext } from "../../../providers/userContext";
 import { getDatabase } from "firebase/database";
 import tasksService from "../../../services/tasks";
@@ -17,7 +17,7 @@ type ITaskItemProps = {
   dragOverlay?: boolean
 }
 
-export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId, projId, id, dragOverlay }) => {
+export const TaskItem: React.FunctionComponent<ITaskItemProps> = memo(({ task, condId, projId, id, dragOverlay }) => {
   const { user } = useContext(UserContext)
 
   const { token } = theme.useToken()
@@ -50,8 +50,6 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
     cursor: dragOverlay ? "grabbing" : "grab"
   };
 
-
-
   if (task) {
     const { displayName, description } = task
     return <Card
@@ -79,7 +77,7 @@ export const TaskItem: React.FunctionComponent<ITaskItemProps> = ({ task, condId
       <Button onClick={() => setIsModalOpen(true)} icon={<PlusOutlined />} block>Добавить задачу</Button>
     </>
   }
-}
+})
 
 
 
